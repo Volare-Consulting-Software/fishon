@@ -32,3 +32,32 @@ body {
 * {
   border-color: var(--color-line);
 }
+
+/* Loading splash: fish swimming under water. */
+@keyframes fw-swim {
+  from {
+    transform: translateX(-20vw) scaleX(1);
+  }
+  to {
+    transform: translateX(120vw) scaleX(1);
+  }
+}
+@keyframes fw-bob {
+  0%,
+  100% {
+    margin-top: 0;
+  }
+  50% {
+    margin-top: -10px;
+  }
+}
+@keyframes fw-bubble {
+  from {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(-140px);
+    opacity: 0;
+  }
+}
