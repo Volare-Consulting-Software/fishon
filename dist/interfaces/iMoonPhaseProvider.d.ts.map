@@ -1,1 +1,0 @@
-{"version":3,"file":"iMoonPhaseProvider.d.ts","sourceRoot":"","sources":["../../src/interfaces/iMoonPhaseProvider.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,YAAY,EAAE,MAAM,eAAe,CAAC;AAE5D,MAAM,WAAW,kBAAkB;IACjC,QAAQ,CAAC,IAAI,EAAE,IAAI,GAAG,MAAM,GAAG,aAAa,CAAC;IAC7C,gBAAgB,CAAC,SAAS,EAAE,IAAI,GAAG,MAAM,EAAE,OAAO,EAAE,MAAM,GAAG,YAAY,CAAC;CAC3E"}

@@ -1,1 +1,0 @@
-{"version":3,"file":"iLogger.d.ts","sourceRoot":"","sources":["../../src/interfaces/iLogger.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,OAAO;IACtB,IAAI,CAAC,OAAO,EAAE,MAAM,GAAG,IAAI,CAAC;IAC5B,IAAI,CAAC,OAAO,EAAE,MAAM,GAAG,IAAI,CAAC;IAC5B,KAAK,CAAC,OAAO,EAAE,MAAM,GAAG,IAAI,CAAC;CAC9B"}

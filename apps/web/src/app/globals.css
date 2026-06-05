@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* Volare brand theme (ECU Purple) — light only, no dark mode. */
+@theme {
+  --color-brand: #5e27d2;
+  --color-brand-strong: #4a1eb0;
+  --color-brand-subtle: #efeaff;
+
+  --color-ink: #1a1625;
+  --color-ink-2: #4b4658;
+  --color-ink-3: #9c97aa;
+
+  --color-line: #e4e2ea;
+  --color-surface: #ffffff;
+  --color-raised: #faf9fd;
+  --color-sunken: #f1eff7;
+
+  --color-success: #1f9d55;
+  --color-warning: #c77700;
+  --color-error: #d93030;
+  --color-info: #1e6fb8;
+
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--color-sunken);
+  color: var(--color-ink);
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+/* Loading splash: fish swimming under water. */
+@keyframes fw-swim {
+  from {
+    transform: translateX(-20vw) scaleX(1);
+  }
+  to {
+    transform: translateX(120vw) scaleX(1);
+  }
+}
+@keyframes fw-bob {
+  0%,
+  100% {
+    margin-top: 0;
+  }
+  50% {
+    margin-top: -10px;
+  }
+}
+@keyframes fw-bubble {
+  from {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(-140px);
+    opacity: 0;
+  }
+}
