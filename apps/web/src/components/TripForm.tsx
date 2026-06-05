@@ -107,6 +107,7 @@ export function TripForm() {
   const [timesOfDay, setTimesOfDay] = useState<TimeOfDay[]>([]);
   const [location, setLocation] = useState("");
   const [query, setQuery] = useState("");
+  const [selectedText, setSelectedText] = useState("");
   const [suggestions, setSuggestions] = useState<GeoSuggestion[]>([]);
   const [methods, setMethods] = useState<FishingMethod[]>([]);
   const [areaSpecies, setAreaSpecies] = useState<FishSpecies[]>([]);
@@ -125,7 +126,7 @@ export function TripForm() {
 
   // Location autocomplete (debounced).
   useEffect(() => {
-    if (query.trim().length < 3 || query === location) {
+    if (query.trim().length < 3 || query === selectedText) {
       setSuggestions([]);
       return;
     }
@@ -138,7 +139,7 @@ export function TripForm() {
       }
     }, 250);
     return () => clearTimeout(id);
-  }, [query, location]);
+  }, [query, selectedText]);
 
   function toggle<T>(list: T[], value: T): T[] {
     return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -163,6 +164,7 @@ export function TripForm() {
     const clean = cleanLocation(s.text);
     setLocation(clean);
     setQuery(clean);
+    setSelectedText(clean);
     setSuggestions([]);
     setAreaSpecies([]);
     setInterested([]);
