@@ -158,6 +158,18 @@ function WindArrow(props: {
   );
 }
 
+const COMPASS16 = [
+  "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
+];
+// Cardinal direction for the wind tooltip: prefer the compass field, else
+// derive it from the degrees so the tooltip always carries a direction.
+function compassOf(deg?: number | null, fallback?: string | null): string {
+  if (fallback) return fallback;
+  if (deg === null || deg === undefined) return "";
+  return COMPASS16[Math.round(deg / 22.5) % 16] ?? "";
+}
+
 export function DayCharts({
   tides,
   periods,
@@ -221,10 +233,13 @@ export function DayCharts({
             <Tooltip
               contentStyle={tooltipStyle}
               labelFormatter={(value) => hourLabel(Number(value))}
-              formatter={(value: number, _n, item) => [
-                `${value} mph${item.payload.windDirCompass ? ` from ${item.payload.windDirCompass}` : ""}`,
-                "Wind",
-              ]}
+              formatter={(value: number, _n, item) => {
+                const dir = compassOf(
+                  item.payload.windDirDeg,
+                  item.payload.windDirCompass
+                );
+                return [`${value} mph${dir ? ` from ${dir}` : ""}`, "Wind"];
+              }}
             />
             <Line type="monotone" dataKey="value" stroke="transparent" strokeWidth={0} dot={WindArrow} activeDot={false} isAnimationActive={false} />
           </LineChart>
@@ -236,7 +251,7 @@ export function DayCharts({
               <CartesianGrid stroke={GRID} vertical={false} />
               <XAxis {...slotXAxis} />
               <YAxis tick={{ fill: AXIS, fontSize: 11 }} width={30} domain={[0, (max: number) => Math.max(5, Math.ceil(max + 2))]} />
-              <Tooltip contentStyle={tooltipStyle} labelFormatter={(slot) => (slot === "Afternoon" ? "Afternoon · ~3 PM" : "Morning · ~9 AM")} formatter={(value: number, _n, item) => [`${value} mph${item.payload.windDirCompass ? ` from ${item.payload.windDirCompass}` : ""}`, "Wind"]} />
+              <Tooltip contentStyle={tooltipStyle} labelFormatter={(slot) => (slot === "Afternoon" ? "Afternoon · ~3 PM" : "Morning · ~9 AM")} formatter={(value: number, _n, item) => { const dir = compassOf(item.payload.windDirDeg, item.payload.windDirCompass); return [`${value} mph${dir ? ` from ${dir}` : ""}`, "Wind"]; }} />
               <Line type="linear" dataKey="value" stroke="transparent" strokeWidth={0} dot={WindArrow} activeDot={false} isAnimationActive={false}>
                 <LabelList dataKey="value" position="top" offset={12} formatter={(v: number) => `${v} mph`} style={{ fill: "#1a1625", fontSize: 11, fontWeight: 600 }} />
               </Line>

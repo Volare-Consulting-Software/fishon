@@ -32,9 +32,11 @@ interface OverpassResponse {
 }
 
 const MAX_SPOTS = 25;
-// Reef datasets list many material patches at nearly the same site; collapse
-// spots closer than this to the nearest already-kept one.
-const SPOT_MERGE_MILES = 0.2;
+// Reef datasets list many material patches strung ~0.2 mi apart along one site;
+// collapse spots within this of ANY already-seen spot (transitively, so a whole
+// chain reduces to a single marker). Distinct reef complexes here sit 2+ mi
+// apart, so 0.5 mi cleanly separates them while merging the patches.
+const SPOT_MERGE_MILES = 0.5;
 
 @injectable()
 export class FishingSpotProvider implements IFishingSpotProvider {
@@ -62,12 +64,15 @@ export class FishingSpotProvider implements IFishingSpotProvider {
       .filter((s) => s.distanceMiles <= radiusMiles)
       .sort((a, b) => a.distanceMiles - b.distanceMiles);
 
-    // Keep the nearest spot of each tight cluster.
+    // Keep the nearest spot of each cluster. Compare against every seen spot
+    // (kept or dropped) so a chain of patches 0.2 mi apart collapses to one.
     const spots: FishingSpot[] = [];
+    const seen: { lat: number; lng: number }[] = [];
     for (const s of candidates) {
-      const tooClose = spots.some(
-        (k) => haversineMiles(k.lat, k.lng, s.lat, s.lng) <= SPOT_MERGE_MILES
+      const tooClose = seen.some(
+        (p) => haversineMiles(p.lat, p.lng, s.lat, s.lng) <= SPOT_MERGE_MILES
       );
+      seen.push({ lat: s.lat, lng: s.lng });
       if (tooClose) continue;
       spots.push(s);
       if (spots.length >= MAX_SPOTS) break;

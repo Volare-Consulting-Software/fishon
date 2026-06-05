@@ -1,7 +1,6 @@
 import type { ForecastRow } from "@volare-consulting/fishon";
-import { Info, Navigation, Waves } from "lucide-react";
-import { MoonIcon } from "./MoonIcon";
-import { moonInsight } from "@/lib/moonInsight";
+import { Navigation, Waves } from "lucide-react";
+import { MoonInfo } from "./MoonInfo";
 
 // A period with all-zero temp/wind/gust/wave wasn't calm — fishweather hadn't
 // captured that window (e.g. a morning that already passed). Show that plainly
@@ -16,7 +15,8 @@ function isCaptured(row: ForecastRow): boolean {
 }
 
 // A compact wind + wave readout for one period (AM/PM). The morning card also
-// carries the previous night's moon, since that drives the morning bite timing.
+// carries the previous night's moon — kept on the title line (with the timing
+// tip behind an info icon) so the two cards stay the same height.
 export function WindWaveGauge({
   row,
   moon,
@@ -36,27 +36,19 @@ export function WindWaveGauge({
     dirCompass: row.windDirCompass,
   };
 
-  const moonBlock =
-    moon && moon.phase ? (
-      <div className="mb-2 rounded-md border border-line bg-sunken px-2 py-1.5">
-        <div className="flex items-center gap-1.5 text-xs font-medium text-ink-2">
-          <MoonIcon illumination={moon.illumination} />
-          {moon.phase} · {moon.illumination}%
-        </div>
-        <p className="mt-1 flex items-start gap-1 text-[11px] text-ink-3">
-          <Info className="mt-0.5 h-3 w-3 shrink-0 text-brand" />
-          <span>{moonInsight(moon.illumination)}</span>
-        </p>
-      </div>
-    ) : null;
+  const header = (
+    <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold uppercase tracking-wide text-ink-3">
+      <span>{label}</span>
+      {moon && moon.phase && (
+        <MoonInfo phase={moon.phase} illumination={moon.illumination} />
+      )}
+    </div>
+  );
 
   if (!isCaptured(row)) {
     return (
       <div className="rounded-lg border border-line bg-surface p-3">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-3">
-          {label}
-        </div>
-        {moonBlock}
+        {header}
         <p className="text-xs text-ink-3">
           Not captured for this window — fishweather hadn&apos;t posted a reading
           here (often a window that has already passed).
@@ -73,10 +65,7 @@ export function WindWaveGauge({
         : "text-info";
   return (
     <div className="rounded-lg border border-line bg-surface p-3">
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-3">
-        {label}
-      </div>
-      {moonBlock}
+      {header}
       <div className="flex items-center gap-3">
         <Navigation
           className="h-5 w-5 text-brand"
