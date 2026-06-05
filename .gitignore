@@ -3,3 +3,9 @@ dist/
 debug-screenshot.png
 .playwright-mcp/
 .claude/
+
+# Next.js
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.vercel/
