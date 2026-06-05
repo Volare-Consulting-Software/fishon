@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   container,
   TOKENS,
-  type ITideProvider,
+  type TideProvider,
 } from "@volare-consulting/fishon";
 
 export const runtime = "nodejs";
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   const days = Number(request.nextUrl.searchParams.get("days") ?? 7) || 7;
   try {
     const result = await container
-      .resolve<ITideProvider>(TOKENS.ITideProvider)
+      .resolve<TideProvider>(TOKENS.TideProvider)
       .getTides(location, days);
     return NextResponse.json(result);
   } catch (err) {

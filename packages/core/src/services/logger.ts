@@ -1,8 +1,8 @@
 import { injectable } from "tsyringe";
-import { ILogger } from "../interfaces";
+import { Logger } from "../interfaces";
 
 @injectable()
-export class ConsoleLogger implements ILogger {
+export class ConsoleLogger implements Logger {
   info(message: string): void {
     console.log(message);
   }

@@ -3,7 +3,7 @@ import "reflect-metadata";
 import "./container";
 import { container } from "tsyringe";
 import { ForecastService } from "./services/forecastService";
-import { TOKENS, ITideProvider } from "./interfaces";
+import { TOKENS, TideProvider } from "./interfaces";
 import {
   formatForecastTable,
   formatTideReport,
@@ -50,7 +50,7 @@ async function main(): Promise<void> {
   try {
     if (tidesOnly) {
       console.log(`Fetching tides near "${location}"...`);
-      const tideProvider = container.resolve<ITideProvider>(TOKENS.ITideProvider);
+      const tideProvider = container.resolve<TideProvider>(TOKENS.TideProvider);
       const result = await tideProvider.getTides(location);
       if (outputJson) {
         console.log(JSON.stringify(result, null, 2));

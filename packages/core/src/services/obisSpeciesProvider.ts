@@ -1,10 +1,10 @@
 import { inject, injectable } from "tsyringe";
 import {
   TOKENS,
-  IHttpClient,
-  IGeocoder,
-  ILogger,
-  ISpeciesProvider,
+  HttpClient,
+  Geocoder,
+  Logger,
+  SpeciesProvider,
 } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
 import { FishSpecies } from "../types/fishSpecies";
@@ -28,14 +28,14 @@ interface WormsVernacular {
 const MAX_SPECIES = 25;
 
 @injectable()
-export class SpeciesProvider implements ISpeciesProvider {
+export class ObisSpeciesProvider implements SpeciesProvider {
   private cache = new Map<string, FishSpecies[]>();
 
   constructor(
-    @inject(TOKENS.IGeocoder) private readonly geocoder: IGeocoder,
-    @inject(TOKENS.IHttpClient) private readonly httpClient: IHttpClient,
+    @inject(TOKENS.Geocoder) private readonly geocoder: Geocoder,
+    @inject(TOKENS.HttpClient) private readonly httpClient: HttpClient,
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig,
-    @inject(TOKENS.ILogger) private readonly logger: ILogger
+    @inject(TOKENS.Logger) private readonly logger: Logger
   ) {}
 
   async getSpecies(location: string): Promise<FishSpecies[]> {

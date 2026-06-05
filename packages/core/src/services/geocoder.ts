@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { TOKENS, IHttpClient, IGeocoder } from "../interfaces";
+import { TOKENS, HttpClient, Geocoder } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
 import { GeoLocation, GeoSuggestion } from "../types/geo";
 import { GeocodeResponse } from "../types/noaa";
@@ -9,9 +9,9 @@ interface ArcGisSuggestResponse {
 }
 
 @injectable()
-export class ArcGisGeocoder implements IGeocoder {
+export class ArcGisGeocoder implements Geocoder {
   constructor(
-    @inject(TOKENS.IHttpClient) private readonly httpClient: IHttpClient,
+    @inject(TOKENS.HttpClient) private readonly httpClient: HttpClient,
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig
   ) {}
 

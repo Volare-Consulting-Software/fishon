@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   container,
   TOKENS,
-  type IGeocoder,
-  type IMarineHourlyProvider,
+  type Geocoder,
+  type MarineHourlyProvider,
 } from "@volare-consulting/fishon";
 
 export const runtime = "nodejs";
@@ -17,10 +17,10 @@ export async function GET(request: NextRequest) {
   }
   try {
     const geo = await container
-      .resolve<IGeocoder>(TOKENS.IGeocoder)
+      .resolve<Geocoder>(TOKENS.Geocoder)
       .geocode(location);
     const result = await container
-      .resolve<IMarineHourlyProvider>(TOKENS.IMarineHourlyProvider)
+      .resolve<MarineHourlyProvider>(TOKENS.MarineHourlyProvider)
       .getHourlyWind(geo.lat, geo.lng);
     return NextResponse.json(result);
   } catch (err) {

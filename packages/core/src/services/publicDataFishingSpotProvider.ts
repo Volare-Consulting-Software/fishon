@@ -1,10 +1,10 @@
 import { inject, injectable } from "tsyringe";
 import {
   TOKENS,
-  IHttpClient,
-  IGeocoder,
-  ILogger,
-  IFishingSpotProvider,
+  HttpClient,
+  Geocoder,
+  Logger,
+  FishingSpotProvider,
 } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
 import { FishingSpot, SpotKind } from "../types/fishingSpot";
@@ -39,14 +39,14 @@ const MAX_SPOTS = 25;
 const SPOT_MERGE_MILES = 0.5;
 
 @injectable()
-export class FishingSpotProvider implements IFishingSpotProvider {
+export class PublicDataFishingSpotProvider implements FishingSpotProvider {
   private cache = new Map<string, FishingSpot[]>();
 
   constructor(
-    @inject(TOKENS.IGeocoder) private readonly geocoder: IGeocoder,
-    @inject(TOKENS.IHttpClient) private readonly httpClient: IHttpClient,
+    @inject(TOKENS.Geocoder) private readonly geocoder: Geocoder,
+    @inject(TOKENS.HttpClient) private readonly httpClient: HttpClient,
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig,
-    @inject(TOKENS.ILogger) private readonly logger: ILogger
+    @inject(TOKENS.Logger) private readonly logger: Logger
   ) {}
 
   async getSpots(location: string, radiusMiles: number): Promise<FishingSpot[]> {

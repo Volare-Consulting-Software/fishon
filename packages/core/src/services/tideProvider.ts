@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { TOKENS, IHttpClient, IGeocoder } from "../interfaces";
+import { TOKENS, HttpClient, Geocoder } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
 import { TideType } from "../types/tideType";
 import { TideStation, TidePrediction, TideResult } from "../types/tide";
@@ -10,8 +10,8 @@ export class NoaaTideProvider {
   private stationCache: NoaaStation[] | null = null;
 
   constructor(
-    @inject(TOKENS.IHttpClient) private readonly httpClient: IHttpClient,
-    @inject(TOKENS.IGeocoder) private readonly geocoder: IGeocoder,
+    @inject(TOKENS.HttpClient) private readonly httpClient: HttpClient,
+    @inject(TOKENS.Geocoder) private readonly geocoder: Geocoder,
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig
   ) {}
 

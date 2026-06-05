@@ -7,12 +7,12 @@ import { z } from "zod";
 import { ForecastService } from "./services/forecastService";
 import {
   TOKENS,
-  IGeocoder,
-  ITideProvider,
-  IFishingSpotProvider,
-  ISpeciesProvider,
-  ISpeciesEnrichmentProvider,
-  IMarineHourlyProvider,
+  Geocoder,
+  TideProvider,
+  FishingSpotProvider,
+  SpeciesProvider,
+  SpeciesEnrichmentProvider,
+  MarineHourlyProvider,
 } from "./interfaces";
 import { FishweatherApiClient } from "./apiClient";
 import { ForecastResult } from "./types/forecastResult";
@@ -44,9 +44,9 @@ interface FishweatherDataSource {
 }
 
 async function embeddedHourlyWind(location: string): Promise<HourlyWindResult> {
-  const geo = await container.resolve<IGeocoder>(TOKENS.IGeocoder).geocode(location);
+  const geo = await container.resolve<Geocoder>(TOKENS.Geocoder).geocode(location);
   return container
-    .resolve<IMarineHourlyProvider>(TOKENS.IMarineHourlyProvider)
+    .resolve<MarineHourlyProvider>(TOKENS.MarineHourlyProvider)
     .getHourlyWind(geo.lat, geo.lng);
 }
 
@@ -67,24 +67,24 @@ function createDataSource(): FishweatherDataSource {
     getForecast: (location) =>
       container.resolve(ForecastService).getForecast(location),
     getTides: (location, days) =>
-      container.resolve<ITideProvider>(TOKENS.ITideProvider).getTides(location, days),
+      container.resolve<TideProvider>(TOKENS.TideProvider).getTides(location, days),
     getSpots: (location, radiusMiles) =>
       container
-        .resolve<IFishingSpotProvider>(TOKENS.IFishingSpotProvider)
+        .resolve<FishingSpotProvider>(TOKENS.FishingSpotProvider)
         .getSpots(location, radiusMiles),
     getSpecies: (location) =>
       container
-        .resolve<ISpeciesProvider>(TOKENS.ISpeciesProvider)
+        .resolve<SpeciesProvider>(TOKENS.SpeciesProvider)
         .getSpecies(location),
     getSpeciesProfiles: async (location) => {
       const [geo, species] = await Promise.all([
-        container.resolve<IGeocoder>(TOKENS.IGeocoder).geocode(location),
+        container.resolve<Geocoder>(TOKENS.Geocoder).geocode(location),
         container
-          .resolve<ISpeciesProvider>(TOKENS.ISpeciesProvider)
+          .resolve<SpeciesProvider>(TOKENS.SpeciesProvider)
           .getSpecies(location),
       ]);
       return container
-        .resolve<ISpeciesEnrichmentProvider>(TOKENS.ISpeciesEnrichmentProvider)
+        .resolve<SpeciesEnrichmentProvider>(TOKENS.SpeciesEnrichmentProvider)
         .enrich(species.slice(0, PROFILE_SPECIES_COUNT), geo);
     },
     getHourlyWind: (location) => embeddedHourlyWind(location),

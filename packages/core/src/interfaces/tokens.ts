@@ -7,16 +7,16 @@ function createTokens<const T extends readonly string[]>(
 }
 
 export const TOKENS = createTokens([
-  "IHttpClient",
-  "IGeocoder",
-  "ITideProvider",
-  "IMoonPhaseProvider",
-  "IWeatherScraper",
-  "ILogger",
-  "IFishingSpotProvider",
-  "ISpeciesProvider",
-  "ISpeciesEnrichmentProvider",
-  "ISpeciesRegulationsProvider",
-  "IMarineHourlyProvider",
+  "HttpClient",
+  "Geocoder",
+  "TideProvider",
+  "MoonPhaseProvider",
+  "WeatherScraper",
+  "Logger",
+  "FishingSpotProvider",
+  "SpeciesProvider",
+  "SpeciesEnrichmentProvider",
+  "SpeciesRegulationsProvider",
+  "MarineHourlyProvider",
   "ForecastServiceConfig",
 ] as const);

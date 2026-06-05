@@ -1,5 +1,5 @@
 import { TideResult } from "../types/tide";
 
-export interface ITideProvider {
+export interface TideProvider {
   getTides(location: string, numDays?: number): Promise<TideResult>;
 }

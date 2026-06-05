@@ -6,7 +6,7 @@ export interface SpeciesNameRef {
   scientificName: string;
 }
 
-export interface ISpeciesRegulationsProvider {
+export interface SpeciesRegulationsProvider {
   getRegulations(
     species: SpeciesNameRef[],
     lat: number,

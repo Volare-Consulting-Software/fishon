@@ -1,5 +1,5 @@
 import { FishSpecies } from "../types/fishSpecies";
 
-export interface ISpeciesProvider {
+export interface SpeciesProvider {
   getSpecies(location: string): Promise<FishSpecies[]>;
 }

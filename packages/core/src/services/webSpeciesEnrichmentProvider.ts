@@ -1,10 +1,10 @@
 import { inject, injectable } from "tsyringe";
 import {
   TOKENS,
-  IHttpClient,
-  ILogger,
-  ISpeciesEnrichmentProvider,
-  ISpeciesRegulationsProvider,
+  HttpClient,
+  Logger,
+  SpeciesEnrichmentProvider,
+  SpeciesRegulationsProvider,
 } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
 import { FishSpecies } from "../types/fishSpecies";
@@ -15,7 +15,7 @@ import {
   SpeciesRegulation,
 } from "../types/speciesProfile";
 
-interface INatTaxaResponse {
+interface NaturalistTaxaResponse {
   results?: Array<{
     default_photo?: { medium_url?: string; attribution?: string };
   }>;
@@ -27,13 +27,13 @@ interface WikiSummary {
 }
 
 @injectable()
-export class SpeciesEnrichmentProvider implements ISpeciesEnrichmentProvider {
+export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
   constructor(
-    @inject(TOKENS.IHttpClient) private readonly httpClient: IHttpClient,
+    @inject(TOKENS.HttpClient) private readonly httpClient: HttpClient,
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig,
-    @inject(TOKENS.ILogger) private readonly logger: ILogger,
-    @inject(TOKENS.ISpeciesRegulationsProvider)
-    private readonly regulations: ISpeciesRegulationsProvider
+    @inject(TOKENS.Logger) private readonly logger: Logger,
+    @inject(TOKENS.SpeciesRegulationsProvider)
+    private readonly regulations: SpeciesRegulationsProvider
   ) {}
 
   async enrich(
@@ -84,7 +84,7 @@ export class SpeciesEnrichmentProvider implements ISpeciesEnrichmentProvider {
     scientificName: string
   ): Promise<{ url?: string; attribution?: string }> {
     try {
-      const data = await this.httpClient.get<INatTaxaResponse>(
+      const data = await this.httpClient.get<NaturalistTaxaResponse>(
         `${this.config.inaturalistApiUrl}/taxa?q=${encodeURIComponent(scientificName)}&rank=species&per_page=1`,
         { "User-Agent": this.config.userAgent }
       );

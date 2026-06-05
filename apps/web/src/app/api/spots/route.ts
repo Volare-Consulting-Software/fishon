@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   container,
   TOKENS,
-  type IFishingSpotProvider,
+  type FishingSpotProvider,
 } from "@volare-consulting/fishon";
 
 export const runtime = "nodejs";
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     Number(request.nextUrl.searchParams.get("radiusMiles") ?? 50) || 50;
   try {
     const result = await container
-      .resolve<IFishingSpotProvider>(TOKENS.IFishingSpotProvider)
+      .resolve<FishingSpotProvider>(TOKENS.FishingSpotProvider)
       .getSpots(location, radiusMiles);
     return NextResponse.json(result);
   } catch (err) {

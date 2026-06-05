@@ -1,12 +1,12 @@
 import type {
   ForecastService,
-  IGeocoder,
-  ITideProvider,
-  IMoonPhaseProvider,
-  IFishingSpotProvider,
-  ISpeciesProvider,
-  ISpeciesEnrichmentProvider,
-  IMarineHourlyProvider,
+  Geocoder,
+  TideProvider,
+  MoonPhaseProvider,
+  FishingSpotProvider,
+  SpeciesProvider,
+  SpeciesEnrichmentProvider,
+  MarineHourlyProvider,
   ForecastRow,
   FishingSpot,
   FishSpecies,
@@ -28,13 +28,13 @@ const DEFAULT_ENRICHED_SPECIES = 6;
 export class ReportOrchestrator {
   constructor(
     private readonly forecastService: ForecastService,
-    private readonly geocoder: IGeocoder,
-    private readonly tideProvider: ITideProvider,
-    private readonly moonProvider: IMoonPhaseProvider,
-    private readonly spotProvider: IFishingSpotProvider,
-    private readonly speciesProvider: ISpeciesProvider,
-    private readonly enrichmentProvider: ISpeciesEnrichmentProvider,
-    private readonly marineHourlyProvider: IMarineHourlyProvider,
+    private readonly geocoder: Geocoder,
+    private readonly tideProvider: TideProvider,
+    private readonly moonProvider: MoonPhaseProvider,
+    private readonly spotProvider: FishingSpotProvider,
+    private readonly speciesProvider: SpeciesProvider,
+    private readonly enrichmentProvider: SpeciesEnrichmentProvider,
+    private readonly marineHourlyProvider: MarineHourlyProvider,
     private readonly suggestionService: SuggestionService
   ) {}
 

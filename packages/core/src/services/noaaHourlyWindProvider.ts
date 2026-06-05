@@ -1,9 +1,9 @@
 import { inject, injectable } from "tsyringe";
 import {
   TOKENS,
-  IHttpClient,
-  ILogger,
-  IMarineHourlyProvider,
+  HttpClient,
+  Logger,
+  MarineHourlyProvider,
 } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
 import { HourlyWindPoint, HourlyWindResult } from "../types/hourlyWind";
@@ -38,13 +38,13 @@ const COMPASS = [
 // can't. Wave height is intentionally NOT taken from here — NDFD gridpoints
 // carry only ~1 wave value/day, so we keep fishweather's AM/PM wave instead.
 @injectable()
-export class NoaaHourlyWindProvider implements IMarineHourlyProvider {
+export class NoaaHourlyWindProvider implements MarineHourlyProvider {
   private cache = new Map<string, HourlyWindResult>();
 
   constructor(
-    @inject(TOKENS.IHttpClient) private readonly httpClient: IHttpClient,
+    @inject(TOKENS.HttpClient) private readonly httpClient: HttpClient,
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig,
-    @inject(TOKENS.ILogger) private readonly logger: ILogger
+    @inject(TOKENS.Logger) private readonly logger: Logger
   ) {}
 
   async getHourlyWind(lat: number, lng: number): Promise<HourlyWindResult> {

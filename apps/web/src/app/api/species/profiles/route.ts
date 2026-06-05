@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   container,
   TOKENS,
-  type IGeocoder,
-  type ISpeciesProvider,
-  type ISpeciesEnrichmentProvider,
+  type Geocoder,
+  type SpeciesProvider,
+  type SpeciesEnrichmentProvider,
 } from "@volare-consulting/fishon";
 
 export const runtime = "nodejs";
@@ -27,12 +27,12 @@ export async function GET(request: NextRequest) {
     : [];
 
   try {
-    const geocoder = container.resolve<IGeocoder>(TOKENS.IGeocoder);
-    const speciesProvider = container.resolve<ISpeciesProvider>(
-      TOKENS.ISpeciesProvider
+    const geocoder = container.resolve<Geocoder>(TOKENS.Geocoder);
+    const speciesProvider = container.resolve<SpeciesProvider>(
+      TOKENS.SpeciesProvider
     );
-    const enrichment = container.resolve<ISpeciesEnrichmentProvider>(
-      TOKENS.ISpeciesEnrichmentProvider
+    const enrichment = container.resolve<SpeciesEnrichmentProvider>(
+      TOKENS.SpeciesEnrichmentProvider
     );
 
     const [geo, species] = await Promise.all([
