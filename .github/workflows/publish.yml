@@ -1,0 +1,56 @@
+name: Publish to npm
+
+# Release flow (monorepo — the published package lives in packages/core):
+#   1. Bump packages/core/package.json version on a PR and merge to main.
+#   2. Tag the merge commit: `git tag v1.1.0 && git push origin v1.1.0`
+#      (the tag must equal packages/core/package.json version, or the job fails).
+# Pushing the tag builds packages/core and `npm publish`es it to the public
+# @volare-consulting npm org using the org-level NPM_TOKEN secret.
+#
+# Why not the shared Volare publish-npm-public.yml (like gimp-mcp uses)? That
+# reusable workflow verifies + publishes the ROOT package.json. Here the root is
+# the private monorepo (fishon-monorepo, "private": true), and the publishable
+# package is packages/core — so we run the same steps scoped to that workspace.
+#
+# Tests are skipped: the core suite drives a Playwright/Chromium browser the
+# publish runner doesn't provision.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Clean install
+        run: npm ci
+
+      - name: Build core
+        run: npm run build -w packages/core
+
+      - name: Verify tag matches packages/core version
+        run: |
+          set -euo pipefail
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(node -p "require('./packages/core/package.json').version")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match packages/core version ($PKG_VERSION)"
+            exit 1
+          fi
+          echo "Publishing @volare-consulting/fishon@$PKG_VERSION"
+
+      - name: Publish to npm
+        run: npm publish -w packages/core --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
