@@ -1,1 +1,0 @@
-{"version":3,"file":"forecastResult.d.ts","sourceRoot":"","sources":["../../src/types/forecastResult.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,WAAW,EAAE,MAAM,QAAQ,CAAC;AACrC,OAAO,EAAE,WAAW,EAAE,MAAM,eAAe,CAAC;AAE5C,MAAM,WAAW,cAAc;IAC7B,OAAO,EAAE,MAAM,CAAC;IAChB,MAAM,EAAE,MAAM,CAAC;IACf,WAAW,EAAE,WAAW,GAAG,IAAI,CAAC;IAChC,QAAQ,EAAE,WAAW,EAAE,CAAC;CACzB"}

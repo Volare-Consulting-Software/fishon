@@ -104,7 +104,7 @@ describe("formatForecastTable", () => {
   it("formatForecastTable_validResult_includesDayHeaderWithMoonPhase", () => {
     const output = formatForecastTable(result);
     expect(output).toContain(
-      `--- Mon ${TEST_DATE} | ${MoonPhase.WaxingGibbous} 80% ---`
+      `--- Mon ${TEST_DATE} | Last Night: ${MoonPhase.WaxingGibbous} 80% ---`
     );
   });
 

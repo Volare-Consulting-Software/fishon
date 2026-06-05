@@ -1,1 +1,0 @@
-{"version":3,"file":"moon.d.ts","sourceRoot":"","sources":["../../src/types/moon.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,aAAa,CAAC;AAExC,MAAM,WAAW,aAAa;IAC5B,KAAK,EAAE,SAAS,CAAC;IACjB,YAAY,EAAE,MAAM,CAAC;IACrB,GAAG,EAAE,MAAM,CAAC;CACb;AAED,MAAM,WAAW,YAAY;IAC3B,CAAC,IAAI,EAAE,MAAM,GAAG,aAAa,CAAC;CAC/B"}
