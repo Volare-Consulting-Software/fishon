@@ -20,8 +20,9 @@ import { TimeOfDay } from "@/types/timeOfDay";
 import { SuggestionService } from "./suggestionService";
 
 const SPOT_RADIUS_MILES = 50;
-const PLANNING_WINDOW_DAYS = 14;
-const TIDE_DAYS = 15;
+// The forecast scrape only covers 7 days, so the planner window matches.
+const PLANNING_WINDOW_DAYS = 7;
+const TIDE_DAYS = 8;
 const MAX_ENRICHED_SPECIES = 12;
 const DEFAULT_ENRICHED_SPECIES = 6;
 
@@ -157,7 +158,7 @@ export class ReportOrchestrator {
     };
   }
 
-  // Keep only requested dates from today through the next 14 days.
+  // Keep only requested dates from today through the next 7 days.
   private withinPlanningWindow(dates: string[]): string[] {
     const today = this.todayIso();
     const max = this.addDaysIso(today, PLANNING_WINDOW_DAYS - 1);

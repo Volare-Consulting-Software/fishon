@@ -29,7 +29,8 @@ import {
 import { LoadingSplash } from "./LoadingSplash";
 import { ReportView } from "./ReportView";
 
-const WINDOW_DAYS = 14;
+// The forecast scrape only covers 7 days, so constrain the picker to match.
+const WINDOW_DAYS = 7;
 const TIMES: { key: TimeOfDay; label: string }[] = [
   { key: "morning", label: "Morning" },
   { key: "midday", label: "Midday" },
@@ -214,7 +215,7 @@ export function TripForm() {
         throw new Error(body.error ?? `Request failed (${res.status})`);
       }
       const data = (await res.json()) as FishingDayReport[];
-      if (data.length === 0) throw new Error("No valid dates within the next 14 days.");
+      if (data.length === 0) throw new Error("No valid dates within the next 7 days.");
       setReports(data);
       const plan: SavedPlan = {
         id: newPlanId(),
