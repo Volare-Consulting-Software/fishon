@@ -70,10 +70,13 @@ export class FishweatherScraper {
     });
     await page.waitForTimeout(5000);
 
+    // The site was redesigned: the old ".jw-spot-list > li" markup is gone.
+    // Results are now anchor rows (a.jwx-spot-list-row) whose href carries the
+    // spot id (/spot/{id}) and whose name lives in a __spot-name child.
     const station = await page.evaluate(() => {
-      const items = document.querySelectorAll(".jw-spot-list > li");
-      for (const li of items) {
-        const text = li.textContent?.replace(/\s+/g, " ").trim() ?? "";
+      const rows = document.querySelectorAll("a.jwx-spot-list-row");
+      for (const row of rows) {
+        const text = row.textContent?.replace(/\s+/g, " ").trim() ?? "";
         const isPremium =
           text.includes("Pro/Gold") ||
           text.includes("Plus/Pro") ||
@@ -81,10 +84,12 @@ export class FishweatherScraper {
           text.includes("PLUS Station");
         if (isPremium) continue;
 
-        const mainEl = li.querySelector('[id$="-main"]');
-        const id = mainEl?.id?.replace("-main", "") || "";
+        const href = row.getAttribute("href") ?? "";
+        const id = href.match(/\/spot\/(\d+)/)?.[1] ?? "";
         const name =
-          li.querySelector(".jw-station-name")?.textContent?.trim() || "";
+          row
+            .querySelector(".jwx-spot-list-row__spot-name")
+            ?.textContent?.trim() || "";
         if (id && name) return { id, name };
       }
       return null;

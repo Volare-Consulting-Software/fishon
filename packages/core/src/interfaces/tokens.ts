@@ -13,5 +13,10 @@ export const TOKENS = createTokens([
   "IMoonPhaseProvider",
   "IWeatherScraper",
   "ILogger",
+  "IFishingSpotProvider",
+  "ISpeciesProvider",
+  "ISpeciesEnrichmentProvider",
+  "ISpeciesRegulationsProvider",
+  "IMarineHourlyProvider",
   "ForecastServiceConfig",
 ] as const);

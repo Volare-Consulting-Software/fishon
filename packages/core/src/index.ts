@@ -18,3 +18,7 @@ export * from "./types/station";
 export * from "./types/tide";
 export * from "./types/tideType";
 export * from "./types/wind";
+export * from "./types/fishingSpot";
+export * from "./types/fishSpecies";
+export * from "./types/speciesProfile";
+export * from "./types/hourlyWind";

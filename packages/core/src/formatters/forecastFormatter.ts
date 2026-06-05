@@ -1,5 +1,8 @@
 import { ForecastResult } from "../types/forecastResult";
 import { TidePrediction, TideResult } from "../types/tide";
+import { FishingSpot } from "../types/fishingSpot";
+import { FishSpecies } from "../types/fishSpecies";
+import { SpeciesProfile } from "../types/speciesProfile";
 
 export function formatTides(tides: TidePrediction[]): string {
   if (tides.length === 0) return "";
@@ -49,5 +52,43 @@ export function formatTideReport(result: TideResult): string {
     }
   }
 
+  return output;
+}
+
+export function formatSpotsReport(spots: FishingSpot[]): string {
+  if (spots.length === 0) return "No nearby fishing spots or structures found.";
+  let output = `\nNearby fishing spots & structures (${spots.length})\n`;
+  for (const s of spots) {
+    const depth = s.depthFeet !== undefined ? ` · ${s.depthFeet} ft` : "";
+    const material = s.material ? ` · ${s.material}` : "";
+    output += `  ${s.kind.padEnd(16)} ${s.name} — ${s.distanceMiles.toFixed(1)} mi${depth}${material} (${s.source})\n`;
+    output += `      ${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}\n`;
+  }
+  return output;
+}
+
+export function formatSpeciesReport(species: FishSpecies[]): string {
+  if (species.length === 0) return "No species records found for this area.";
+  let output = `\nFish recorded nearby (${species.length}), by occurrence\n`;
+  for (const s of species) {
+    output += `  ${String(s.occurrenceCount).padStart(5)}  ${s.commonName} (${s.scientificName})\n`;
+  }
+  return output;
+}
+
+export function formatSpeciesProfilesReport(profiles: SpeciesProfile[]): string {
+  if (profiles.length === 0) return "No species profiles available.";
+  let output = `\nSpecies profiles (${profiles.length})\n`;
+  for (const p of profiles) {
+    output += `\n${p.commonName} (${p.scientificName}) — edibility: ${p.edibility}\n`;
+    if (p.regulation) {
+      const r = p.regulation;
+      const bag = r.bagLimit !== null ? `bag ${r.bagLimit}` : "bag n/a";
+      const min = r.minSize !== null ? `min ${r.minSize}${r.sizeUnit ?? "in"}` : "";
+      output += `  ${r.status === "prohibited" ? "NO HARVEST" : "open"} · ${bag} ${min} (${r.locationName})\n`;
+    }
+    if (p.summary) output += `  ${p.summary}\n`;
+    output += `  Regulations: ${p.regulationsLabel} — ${p.regulationsUrl}\n`;
+  }
   return output;
 }

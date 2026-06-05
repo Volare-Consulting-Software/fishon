@@ -4,10 +4,10 @@ import { IHttpClient } from "../interfaces";
 
 @injectable()
 export class HttpClient implements IHttpClient {
-  get<T>(url: string): Promise<T> {
+  get<T>(url: string, headers?: Record<string, string>): Promise<T> {
     return new Promise((resolve, reject) => {
       https
-        .get(url, (res) => {
+        .get(url, { headers: { Accept: "application/json", ...headers } }, (res) => {
           let data = "";
           res.on("data", (chunk: Buffer) => (data += chunk.toString()));
           res.on("end", () => {
