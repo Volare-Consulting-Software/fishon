@@ -1,5 +1,5 @@
 // Public barrel for the deterministic core. The web app imports everything it
-// needs from "@volare-consulting/fishweather-forecast" through here, so the
+// needs from "@volare-consulting/fishon" through here, so the
 // MCP server, the CLI, and the web API routes all share one source of truth.
 import "reflect-metadata";
 

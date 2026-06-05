@@ -14,7 +14,7 @@ import {
   SpeciesEnrichmentProvider,
   MarineHourlyProvider,
 } from "./interfaces";
-import { FishweatherApiClient } from "./apiClient";
+import { FishonApiClient } from "./apiClient";
 import { ForecastResult } from "./types/forecastResult";
 import { TideResult } from "./types/tide";
 import { FishingSpot } from "./types/fishingSpot";
@@ -34,7 +34,7 @@ const PROFILE_SPECIES_COUNT = 8;
 // One data-source contract, two transports. In embedded mode the methods
 // resolve the core services directly; in API mode they call the public HTTP
 // endpoints — which are themselves thin wrappers over the same core services.
-interface FishweatherDataSource {
+interface FishonDataSource {
   getForecast(location: string): Promise<ForecastResult>;
   getTides(location: string, days: number): Promise<TideResult>;
   getSpots(location: string, radiusMiles: number): Promise<FishingSpot[]>;
@@ -50,10 +50,10 @@ async function embeddedHourlyWind(location: string): Promise<HourlyWindResult> {
     .getHourlyWind(geo.lat, geo.lng);
 }
 
-function createDataSource(): FishweatherDataSource {
-  const apiBaseUrl = process.env["FISHWEATHER_API_BASE_URL"];
+function createDataSource(): FishonDataSource {
+  const apiBaseUrl = process.env["FISHON_API_BASE_URL"];
   if (apiBaseUrl) {
-    const client = new FishweatherApiClient(apiBaseUrl);
+    const client = new FishonApiClient(apiBaseUrl);
     return {
       getForecast: (location) => client.getForecast(location),
       getTides: (location, days) => client.getTides(location, days),
@@ -121,7 +121,7 @@ function errorContent(err: unknown) {
 }
 
 const server = new McpServer({
-  name: "fishweather",
+  name: "fishon",
   version: "1.1.0",
 });
 

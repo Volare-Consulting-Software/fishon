@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "fishweather": {
+    "fishon": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@volare-consulting/fishweather-forecast", "--mcp"]
+      "args": ["-y", "@volare-consulting/fishon", "--mcp"]
     }
   }
 }

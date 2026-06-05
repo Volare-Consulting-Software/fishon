@@ -81,7 +81,7 @@ export class NoaaTideProvider {
       interval: "hilo",
       units: "english",
       format: "json",
-      application: "fishweather",
+      application: "fishon",
     });
 
     const data = await this.httpClient.get<NoaaPredictionsResponse>(

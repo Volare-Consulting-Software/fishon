@@ -1,6 +1,6 @@
 import { FishingDayReport } from "@/types/fishingDayReport";
 
-const KEY = "fishweather.history.v1";
+const KEY = "fishon.history.v1";
 const MAX = 10;
 
 export interface SavedPlan {
