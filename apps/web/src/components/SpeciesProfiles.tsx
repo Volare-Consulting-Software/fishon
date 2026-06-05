@@ -1,7 +1,7 @@
 import type {
   SpeciesProfile,
   EdibilityRating,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 import { ExternalLink, Fish } from "lucide-react";
 
 const FISH_RULES_URL = "https://app.fishrulesapp.com/";

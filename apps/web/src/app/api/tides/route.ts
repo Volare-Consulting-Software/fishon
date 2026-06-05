@@ -3,7 +3,7 @@ import {
   container,
   TOKENS,
   type ITideProvider,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

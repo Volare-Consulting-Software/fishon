@@ -1,5 +1,5 @@
 import { Fish } from "lucide-react";
-import type { FishSpecies } from "@volare-consulting/fishweather-forecast";
+import type { FishSpecies } from "@volare-consulting/fishon";
 
 export function SpeciesChips({
   species,

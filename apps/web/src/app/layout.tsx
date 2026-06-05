@@ -9,7 +9,7 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Fishweather — Plan Your Fishing Day",
+  title: "FishOn — Plan Your Fishing Day",
   description:
     "Plan a fishing trip with real marine conditions, tides, nearby reefs & structures, local fish species, and an AI-suggested best window.",
 };

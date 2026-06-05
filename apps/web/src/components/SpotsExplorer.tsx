@@ -7,7 +7,7 @@ import type {
   FishingSpot,
   GeoLocation,
   SpotKind,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 import { SPOT_CATEGORIES } from "@/lib/spotCategories";
 import { CopyButton } from "./CopyButton";
 

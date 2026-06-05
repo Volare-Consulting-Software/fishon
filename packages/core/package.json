@@ -1,5 +1,5 @@
 {
-  "name": "@volare-consulting/fishweather-forecast",
+  "name": "@volare-consulting/fishon",
   "version": "1.1.0",
   "description": "7-day fishing forecast combining FishWeather wind/wave/weather data, NOAA tide predictions, moon phases, nearby fishing spots, and local fish species. Available as a CLI, Node.js library, and MCP server for Claude Code.",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
     }
   },
   "bin": {
-    "fishweather-forecast": "dist/main.js"
+    "fishon": "dist/main.js"
   },
   "files": [
     "dist/",

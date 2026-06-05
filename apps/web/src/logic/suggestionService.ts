@@ -6,7 +6,7 @@ import type {
   FishSpecies,
   GeoLocation,
   MoonPhase,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 import { FishingMethod } from "@/types/fishingTripRequest";
 import { TimeOfDay } from "@/types/timeOfDay";
 import { DaySuggestion } from "@/types/daySuggestion";

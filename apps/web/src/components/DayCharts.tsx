@@ -4,7 +4,7 @@ import type {
   ForecastRow,
   TidePrediction,
   HourlyWindPoint,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 import {
   Area,
   AreaChart,
@@ -226,7 +226,7 @@ export function DayCharts({
                 "Wind",
               ]}
             />
-            <Line type="monotone" dataKey="value" stroke={BRAND} strokeWidth={2} dot={WindArrow} isAnimationActive={false} />
+            <Line type="monotone" dataKey="value" stroke="transparent" strokeWidth={0} dot={WindArrow} activeDot={false} isAnimationActive={false} />
           </LineChart>
         </ChartBlock>
       ) : (
@@ -236,8 +236,8 @@ export function DayCharts({
               <CartesianGrid stroke={GRID} vertical={false} />
               <XAxis {...slotXAxis} />
               <YAxis tick={{ fill: AXIS, fontSize: 11 }} width={30} domain={[0, (max: number) => Math.max(5, Math.ceil(max + 2))]} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, _n, item) => [`${value} mph${item.payload.windDirCompass ? ` from ${item.payload.windDirCompass}` : ""}`, "Wind"]} />
-              <Line type="linear" dataKey="value" stroke={BRAND} strokeWidth={2} dot={WindArrow} isAnimationActive={false}>
+              <Tooltip contentStyle={tooltipStyle} labelFormatter={(slot) => (slot === "Afternoon" ? "Afternoon · ~3 PM" : "Morning · ~9 AM")} formatter={(value: number, _n, item) => [`${value} mph${item.payload.windDirCompass ? ` from ${item.payload.windDirCompass}` : ""}`, "Wind"]} />
+              <Line type="linear" dataKey="value" stroke="transparent" strokeWidth={0} dot={WindArrow} activeDot={false} isAnimationActive={false}>
                 <LabelList dataKey="value" position="top" offset={12} formatter={(v: number) => `${v} mph`} style={{ fill: "#1a1625", fontSize: 11, fontWeight: 600 }} />
               </Line>
             </LineChart>

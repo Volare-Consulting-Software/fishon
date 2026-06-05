@@ -32,6 +32,9 @@ interface OverpassResponse {
 }
 
 const MAX_SPOTS = 25;
+// Reef datasets list many material patches at nearly the same site; collapse
+// spots closer than this to the nearest already-kept one.
+const SPOT_MERGE_MILES = 0.2;
 
 @injectable()
 export class FishingSpotProvider implements IFishingSpotProvider {
@@ -55,10 +58,20 @@ export class FishingSpotProvider implements IFishingSpotProvider {
       this.queryStructures(geo.lat, geo.lng, radiusMiles),
     ]);
 
-    const spots = [...reefs, ...structures]
+    const candidates = [...reefs, ...structures]
       .filter((s) => s.distanceMiles <= radiusMiles)
-      .sort((a, b) => a.distanceMiles - b.distanceMiles)
-      .slice(0, MAX_SPOTS);
+      .sort((a, b) => a.distanceMiles - b.distanceMiles);
+
+    // Keep the nearest spot of each tight cluster.
+    const spots: FishingSpot[] = [];
+    for (const s of candidates) {
+      const tooClose = spots.some(
+        (k) => haversineMiles(k.lat, k.lng, s.lat, s.lng) <= SPOT_MERGE_MILES
+      );
+      if (tooClose) continue;
+      spots.push(s);
+      if (spots.length >= MAX_SPOTS) break;
+    }
 
     this.cache.set(key, spots);
     return spots;

@@ -1,9 +1,24 @@
-import { Info } from "lucide-react";
+import type { HourlyWindPoint } from "@volare-consulting/fishon";
 import { FishingDayReport } from "@/types/fishingDayReport";
 import { WindWaveGauge } from "./WindWaveGauge";
 import { DayCharts } from "./DayCharts";
-import { MoonIcon } from "./MoonIcon";
-import { moonInsight } from "@/lib/moonInsight";
+
+// Nearest NOAA hourly point to a target hour (within 2h), so the gauge wind
+// matches the hourly wind chart. Returns undefined if none is close enough.
+function nearestWind(hourly: HourlyWindPoint[] | undefined, targetHour: number) {
+  if (!hourly || hourly.length === 0) return undefined;
+  let best = hourly[0]!;
+  for (const p of hourly) {
+    if (Math.abs(p.hour - targetHour) < Math.abs(best.hour - targetHour)) best = p;
+  }
+  if (Math.abs(best.hour - targetHour) > 2) return undefined;
+  return {
+    speed: best.windSpeed,
+    gust: best.windGust,
+    dirDeg: best.windDirDeg ?? 0,
+    dirCompass: best.windDirCompass ?? "",
+  };
+}
 
 function formatDate(iso: string): string {
   const [year, month, day] = iso.split("-").map(Number);
@@ -18,35 +33,29 @@ function formatDate(iso: string): string {
 export function DayCard({ report }: { report: FishingDayReport }) {
   return (
     <article className="rounded-xl border border-line bg-raised p-5 shadow-sm">
-      <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
+      <header className="mb-4">
         <h2 className="text-lg font-bold text-ink">{formatDate(report.date)}</h2>
-        {report.moonPhase && (
-          <div className="flex items-center gap-2 text-xs text-ink-2">
-            <MoonIcon illumination={report.moonIllumination} />
-            <span>
-              {report.moonPhase} · {report.moonIllumination}%
-            </span>
-          </div>
-        )}
       </header>
-
-      {report.moonPhase && (
-        <p className="mb-4 flex items-start gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-xs text-ink-2">
-          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand" />
-          <span>{moonInsight(report.moonIllumination)}</span>
-        </p>
-      )}
 
       {report.marineForecastAvailable ? (
         <div className="grid gap-3 sm:grid-cols-2">
           {report.periods.map((row) => (
-            <WindWaveGauge key={row.period} row={row} />
+            <WindWaveGauge
+              key={row.period}
+              row={row}
+              moon={
+                row.period === "AM" && report.moonPhase
+                  ? { phase: report.moonPhase, illumination: report.moonIllumination }
+                  : undefined
+              }
+              wind={nearestWind(report.hourlyWind, row.period === "AM" ? 9 : 15)}
+            />
           ))}
         </div>
       ) : (
         <p className="rounded-lg border border-info/30 bg-info/10 px-3 py-2 text-xs text-info">
           Detailed wind &amp; wave forecast for this date becomes available
-          within about 7 days. Showing tides, moon, spots, and species below.
+          within about 7 days. Showing tides, spots, and species below.
         </p>
       )}
 

@@ -9,7 +9,7 @@ import {
   type ISpeciesProvider,
   type ISpeciesEnrichmentProvider,
   type IMarineHourlyProvider,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 import { ReportOrchestrator } from "./reportOrchestrator";
 import { SuggestionService } from "./suggestionService";
 

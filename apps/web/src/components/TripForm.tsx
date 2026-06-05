@@ -15,7 +15,7 @@ import {
 import type {
   FishSpecies,
   GeoSuggestion,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 import { FishingMethod } from "@/types/fishingTripRequest";
 import { TimeOfDay } from "@/types/timeOfDay";
 import { FishingDayReport } from "@/types/fishingDayReport";
@@ -424,17 +424,32 @@ export function TripForm() {
         </div>
       )}
 
-      {/* History drawer */}
-      {historyOpen && (
-        <aside className="mt-4 rounded-2xl border border-line bg-raised p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="flex items-center gap-1.5 text-sm font-bold text-ink">
-              <HistoryIcon className="h-4 w-4 text-brand" /> Recent plans
-            </h3>
-            <button type="button" onClick={() => setHistoryOpen(false)} aria-label="Close" className="text-ink-3 hover:text-ink">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+      {/* History slide-in drawer */}
+      <div
+        className={`fixed inset-0 z-40 bg-ink/30 transition-opacity ${
+          historyOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={() => setHistoryOpen(false)}
+      />
+      <aside
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col border-l border-line bg-surface shadow-xl transition-transform ${
+          historyOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between border-b border-line px-4 py-3">
+          <h3 className="flex items-center gap-1.5 text-sm font-bold text-ink">
+            <HistoryIcon className="h-4 w-4 text-brand" /> Recent plans
+          </h3>
+          <button
+            type="button"
+            onClick={() => setHistoryOpen(false)}
+            aria-label="Close"
+            className="rounded-md p-1 text-ink-3 hover:text-ink"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-3">
           {history.length === 0 ? (
             <p className="text-sm text-ink-3">No saved plans yet.</p>
           ) : (
@@ -449,19 +464,24 @@ export function TripForm() {
                     <span className="flex items-center gap-1.5 text-sm font-medium text-ink">
                       <MapPin className="h-3.5 w-3.5 text-brand" /> {p.location}
                     </span>
-                    <span className="text-xs text-ink-3">
+                    <span className="block text-xs text-ink-3">
                       {labelFor([...p.dates].sort()[0] ?? toIso(today))}
                     </span>
                   </button>
-                  <button type="button" onClick={() => deletePlan(p.id)} aria-label="Remove plan" className="text-ink-3 hover:text-error">
+                  <button
+                    type="button"
+                    onClick={() => deletePlan(p.id)}
+                    aria-label="Remove plan"
+                    className="text-ink-3 hover:text-error"
+                  >
                     <X className="h-4 w-4" />
                   </button>
                 </li>
               ))}
             </ul>
           )}
-        </aside>
-      )}
+        </div>
+      </aside>
     </div>
   );
 }

@@ -13,7 +13,7 @@ import type {
   GeoLocation,
   TideResult,
   HourlyWindResult,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 import { FishingTripRequest } from "@/types/fishingTripRequest";
 import { FishingDayReport } from "@/types/fishingDayReport";
 import { TimeOfDay } from "@/types/timeOfDay";

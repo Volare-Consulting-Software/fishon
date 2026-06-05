@@ -1,19 +1,19 @@
 {
-  "name": "fishweather-monorepo",
+  "name": "fishon-monorepo",
   "version": "0.0.0",
   "private": true,
-  "description": "Fishweather monorepo: deterministic core (published MCP server/library) + public web planner app.",
+  "description": "FishOn monorepo: deterministic core (published MCP server/library) + public web planner app.",
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build -w @volare-consulting/fishweather-forecast",
-    "build:web": "npm run build -w @fishweather/web",
+    "build": "npm run build -w @volare-consulting/fishon",
+    "build:web": "npm run build -w @fishon/web",
     "test": "npm run test --workspaces --if-present",
-    "mcp": "npm run mcp -w @volare-consulting/fishweather-forecast",
-    "forecast": "npm run forecast -w @volare-consulting/fishweather-forecast",
-    "dev:web": "npm run dev -w @fishweather/web"
+    "mcp": "npm run mcp -w @volare-consulting/fishon",
+    "forecast": "npm run forecast -w @volare-consulting/fishon",
+    "dev:web": "npm run dev -w @fishon/web"
   },
   "repository": {
     "type": "git",

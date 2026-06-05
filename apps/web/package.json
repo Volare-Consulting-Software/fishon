@@ -1,18 +1,18 @@
 {
-  "name": "@fishweather/web",
+  "name": "@fishon/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "npm run build -w @volare-consulting/fishweather-forecast",
+    "predev": "npm run build -w @volare-consulting/fishon",
     "dev": "next dev",
-    "prebuild": "npm run build -w @volare-consulting/fishweather-forecast",
+    "prebuild": "npm run build -w @volare-consulting/fishon",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
-    "@volare-consulting/fishweather-forecast": "*",
+    "@volare-consulting/fishon": "*",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.460.0",
     "next": "^15.5.0",

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { FishingSpot, GeoLocation } from "@volare-consulting/fishweather-forecast";
+import type { FishingSpot, GeoLocation } from "@volare-consulting/fishon";
 import { SPOT_CATEGORIES } from "@/lib/spotCategories";
 
 function numberedIcon(index: number, color: string, active: boolean): L.DivIcon {

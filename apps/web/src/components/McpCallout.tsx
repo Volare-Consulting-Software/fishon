@@ -2,9 +2,9 @@ import { Info, ExternalLink } from "lucide-react";
 import { CopyButton } from "./CopyButton";
 
 const NPM_URL =
-  "https://www.npmjs.com/package/@volare-consulting/fishweather-forecast";
+  "https://www.npmjs.com/package/@volare-consulting/fishon";
 const INSTALL_CMD =
-  "claude mcp add fishweather -- npx -y @volare-consulting/fishweather-forecast --mcp";
+  "claude mcp add fishon -- npx -y @volare-consulting/fishon --mcp";
 
 export function McpCallout() {
   return (
@@ -30,7 +30,7 @@ export function McpCallout() {
         className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline"
       >
         <ExternalLink className="h-3.5 w-3.5" />
-        @volare-consulting/fishweather-forecast
+        @volare-consulting/fishon
       </a>
 
       <div className="mt-3">

@@ -5,7 +5,7 @@ import {
   type IGeocoder,
   type ISpeciesProvider,
   type ISpeciesEnrichmentProvider,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

@@ -1,4 +1,4 @@
-import type { ForecastRow } from "@volare-consulting/fishweather-forecast";
+import type { ForecastRow } from "@volare-consulting/fishon";
 import { FishingMethod } from "@/types/fishingTripRequest";
 
 interface MethodLimit {

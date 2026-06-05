@@ -1,5 +1,5 @@
 import { Anchor, Construction, Fish, Ship, Waves } from "lucide-react";
-import type { SpotKind } from "@volare-consulting/fishweather-forecast";
+import type { SpotKind } from "@volare-consulting/fishon";
 import type { LucideIcon } from "lucide-react";
 
 export const SPOT_CATEGORIES: Record<

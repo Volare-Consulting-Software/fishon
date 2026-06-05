@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   container,
   ForecastService,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

@@ -9,11 +9,9 @@ export default function Home() {
           <Fish className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-ink">Fishweather</h1>
+          <h1 className="text-2xl font-bold text-ink">FishOn</h1>
           <p className="max-w-2xl text-sm text-ink-2">
-            Plan your fishing day with real marine conditions, tides, nearby
-            reefs &amp; structures, local fish species, and an AI-suggested best
-            window.
+            Plan your day with real conditions, tides, spots &amp; local fish.
           </p>
         </div>
       </header>

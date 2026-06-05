@@ -7,7 +7,7 @@ import type {
   SpeciesProfile,
   MoonPhase,
   HourlyWindPoint,
-} from "@volare-consulting/fishweather-forecast";
+} from "@volare-consulting/fishon";
 import { DaySuggestion } from "./daySuggestion";
 
 export interface FishingDayReport {
