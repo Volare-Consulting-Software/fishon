@@ -145,19 +145,28 @@ export function TripForm() {
     return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
   }
 
-  function setPreset(kind: "today" | "tomorrow" | "weekend") {
-    if (kind === "today") setDates([todayIso]);
-    else if (kind === "tomorrow") setDates([toIso(addDays(today, 1))]);
-    else {
-      const out: string[] = [];
-      for (let i = 0; i < WINDOW_DAYS; i++) {
-        const d = addDays(today, i);
-        if (d.getDay() === 6 || d.getDay() === 0) out.push(toIso(d));
-        if (out.length === 2) break;
-      }
-      setDates(out);
+  function presetDates(kind: "today" | "tomorrow" | "weekend"): string[] {
+    if (kind === "today") return [todayIso];
+    if (kind === "tomorrow") return [toIso(addDays(today, 1))];
+    const out: string[] = [];
+    for (let i = 0; i < WINDOW_DAYS; i++) {
+      const d = addDays(today, i);
+      if (d.getDay() === 6 || d.getDay() === 0) out.push(toIso(d));
+      if (out.length === 2) break;
     }
+    return out;
+  }
+  function setPreset(kind: "today" | "tomorrow" | "weekend") {
+    setDates(presetDates(kind));
     setCalendarOpen(false);
+  }
+  // A preset is "selected" when the chosen dates exactly match its dates.
+  function presetActive(kind: "today" | "tomorrow" | "weekend"): boolean {
+    const target = presetDates(kind);
+    return (
+      dates.length === target.length &&
+      target.every((d) => dates.includes(d))
+    );
   }
 
   function selectSuggestion(s: GeoSuggestion) {
@@ -278,9 +287,9 @@ export function TripForm() {
               When do you want to fish?
             </div>
             <div className="flex flex-wrap gap-2">
-              <Pill active={false} onClick={() => setPreset("today")}>Today</Pill>
-              <Pill active={false} onClick={() => setPreset("tomorrow")}>Tomorrow</Pill>
-              <Pill active={false} onClick={() => setPreset("weekend")}>This weekend</Pill>
+              <Pill active={presetActive("today")} onClick={() => setPreset("today")}>Today</Pill>
+              <Pill active={presetActive("tomorrow")} onClick={() => setPreset("tomorrow")}>Tomorrow</Pill>
+              <Pill active={presetActive("weekend")} onClick={() => setPreset("weekend")}>This weekend</Pill>
               <button
                 type="button"
                 onClick={() => setCalendarOpen((v) => !v)}
