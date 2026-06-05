@@ -13,8 +13,8 @@ interface ObisChecklistItem {
   scientificName?: string;
   taxonRank?: string;
   records?: number;
-  acceptedNameUsageID?: string;
-  taxonID?: string;
+  acceptedNameUsageID?: string | number;
+  taxonID?: string | number;
 }
 interface ObisChecklistResponse {
   results?: ObisChecklistItem[];
@@ -125,6 +125,6 @@ function genusOf(scientificName: string): string {
 // number is the WoRMS AphiaID.
 function aphiaIdOf(item: ObisChecklistItem): string | null {
   const raw = item.acceptedNameUsageID ?? item.taxonID ?? "";
-  const match = raw.match(/(\d+)\s*$/);
+  const match = String(raw).match(/(\d+)\s*$/);
   return match?.[1] ?? null;
 }

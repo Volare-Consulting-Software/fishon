@@ -56,8 +56,10 @@ export class NoaaHourlyWindProvider implements IMarineHourlyProvider {
     const headers = { "User-Agent": this.config.userAgent, Accept: "application/geo+json" };
 
     try {
+      // weather.gov 301-redirects precise coordinates to 4 decimals (and our
+      // httpClient doesn't follow redirects), so round up front.
       const point = await this.httpClient.get<PointsResponse>(
-        `${this.config.weatherGovApiUrl}/points/${lat},${lng}`,
+        `${this.config.weatherGovApiUrl}/points/${lat.toFixed(4)},${lng.toFixed(4)}`,
         headers
       );
       const props = point.properties;
