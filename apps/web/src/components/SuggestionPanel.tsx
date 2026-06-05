@@ -14,7 +14,12 @@ const WINDOW_LABEL: Record<string, string> = {
   fullday: "Full day",
 };
 
-function Field({ label, value }: { label: string; value: string }) {
+interface FieldProps {
+  label: string;
+  value: string;
+}
+
+function Field({ label, value }: FieldProps) {
   return (
     <div>
       <div className="text-xs uppercase tracking-wide text-ink-3">{label}</div>
@@ -23,7 +28,11 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function SuggestionPanel({ suggestion }: { suggestion: DaySuggestion }) {
+interface SuggestionPanelProps {
+  suggestion: DaySuggestion;
+}
+
+export function SuggestionPanel({ suggestion }: SuggestionPanelProps) {
   return (
     <div className="rounded-xl border border-line bg-raised p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-2">

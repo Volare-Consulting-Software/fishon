@@ -16,7 +16,11 @@ function formatDate(iso: string): string {
   });
 }
 
-export function ReportView({ reports }: { reports: FishingDayReport[] }) {
+interface ReportViewProps {
+  reports: FishingDayReport[];
+}
+
+export function ReportView({ reports }: ReportViewProps) {
   const first = reports[0];
   if (!first) return null;
 

@@ -30,7 +30,10 @@ function formatDate(iso: string): string {
   });
 }
 
-export function DayCard({ report }: { report: FishingDayReport }) {
+interface DayCardProps {
+  report: FishingDayReport;
+}
+export function DayCard({ report }: DayCardProps) {
   return (
     <article className="rounded-xl border border-line bg-raised p-5 shadow-sm">
       <header className="mb-4">

@@ -73,15 +73,17 @@ function cleanLocation(text: string): string {
     .trim();
 }
 
+interface PillProps {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
 function Pill({
   active,
   onClick,
   children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
+}: PillProps) {
   return (
     <button
       type="button"

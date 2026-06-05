@@ -1,13 +1,12 @@
 import { Fish } from "lucide-react";
 import type { FishSpecies } from "@volare-consulting/fishon";
 
-export function SpeciesChips({
-  species,
-  highlight,
-}: {
+interface SpeciesChipsProps {
   species: FishSpecies[];
   highlight: string[];
-}) {
+}
+
+export function SpeciesChips({ species, highlight }: SpeciesChipsProps) {
   if (species.length === 0) return null;
   const hi = new Set(highlight.map((h) => h.toLowerCase()));
   return (

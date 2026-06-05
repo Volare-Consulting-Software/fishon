@@ -13,15 +13,13 @@ const EDIBILITY: Record<EdibilityRating, { label: string; className: string }> =
   unknown: { label: "Edibility ?", className: "border-line bg-sunken text-ink-3" },
 };
 
-function Chip({
-  children,
-  className,
-  title,
-}: {
+interface ChipProps {
   children: React.ReactNode;
   className: string;
   title?: string;
-}) {
+}
+
+function Chip({ children, className, title }: ChipProps) {
   return (
     <span
       title={title}
@@ -32,7 +30,11 @@ function Chip({
   );
 }
 
-function RegulationChips({ profile }: { profile: SpeciesProfile }) {
+interface RegulationChipsProps {
+  profile: SpeciesProfile;
+}
+
+function RegulationChips({ profile }: RegulationChipsProps) {
   const reg = profile.regulation;
   if (!reg) return null;
   return (
@@ -57,7 +59,11 @@ function RegulationChips({ profile }: { profile: SpeciesProfile }) {
   );
 }
 
-export function SpeciesProfiles({ profiles }: { profiles: SpeciesProfile[] }) {
+interface SpeciesProfilesProps {
+  profiles: SpeciesProfile[];
+}
+
+export function SpeciesProfiles({ profiles }: SpeciesProfilesProps) {
   if (profiles.length === 0) return null;
   // The regulations link is per-state (identical for every fish), so show it
   // once for the whole section rather than on each card.

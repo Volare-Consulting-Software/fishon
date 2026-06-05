@@ -1,5 +1,8 @@
 // A tiny moon glyph whose lit fraction roughly tracks illumination %.
-export function MoonIcon({ illumination }: { illumination: number }) {
+interface MoonIconProps {
+  illumination: number;
+}
+export function MoonIcon({ illumination }: MoonIconProps) {
   const frac = Math.max(0, Math.min(100, illumination)) / 100;
   // Offset a dark disc over a lit disc; more illumination -> less shadow.
   const offset = (1 - frac) * 14;

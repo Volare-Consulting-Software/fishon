@@ -7,13 +7,12 @@ import { moonInsight } from "@/lib/moonInsight";
 
 // Moon phase chip with a click-to-open timing tip. The popover is styled to
 // match the Recharts tooltips below (white, hairline border, 8px radius).
-export function MoonInfo({
-  phase,
-  illumination,
-}: {
+interface MoonInfoProps {
   phase: string;
   illumination: number;
-}) {
+}
+
+export function MoonInfo({ phase, illumination }: MoonInfoProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
 

@@ -16,19 +16,21 @@ function numberedIcon(index: number, color: string, active: boolean): L.DivIcon 
   });
 }
 
+interface SpotsMapProps {
+  center: GeoLocation;
+  spots: FishingSpot[];
+  selectedIndex: number | null;
+  onSelect: (index: number) => void;
+  fitKey: number;
+}
+
 export default function SpotsMap({
   center,
   spots,
   selectedIndex,
   onSelect,
   fitKey,
-}: {
-  center: GeoLocation;
-  spots: FishingSpot[];
-  selectedIndex: number | null;
-  onSelect: (index: number) => void;
-  fitKey: number;
-}) {
+}: SpotsMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);

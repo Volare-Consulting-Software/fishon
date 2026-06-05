@@ -17,17 +17,19 @@ function isCaptured(row: ForecastRow): boolean {
 // A compact wind + wave readout for one period (AM/PM). The morning card also
 // carries the previous night's moon — kept on the title line (with the timing
 // tip behind an info icon) so the two cards stay the same height.
-export function WindWaveGauge({
-  row,
-  moon,
-  wind,
-}: {
+interface WindWaveGaugeProps {
   row: ForecastRow;
   moon?: { phase: string; illumination: number };
   // When NOAA hourly wind is available we source the gauge wind from it too, so
   // it agrees with the hourly wind chart (instead of fishweather's reading).
   wind?: { speed: number; gust: number | null; dirDeg: number; dirCompass: string };
-}) {
+}
+
+export function WindWaveGauge({
+  row,
+  moon,
+  wind,
+}: WindWaveGaugeProps) {
   const label = row.period === "AM" ? "Morning · ~9 AM" : "Afternoon · ~3 PM";
   const w = wind ?? {
     speed: row.windSpeed,

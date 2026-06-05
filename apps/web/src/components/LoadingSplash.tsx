@@ -11,19 +11,20 @@ const MESSAGES = [
   "Putting your day together…",
 ];
 
+interface FishProps {
+  top: string;
+  duration: number;
+  delay: number;
+  color: string;
+  size: number;
+}
 function Fish({
   top,
   duration,
   delay,
   color,
   size,
-}: {
-  top: string;
-  duration: number;
-  delay: number;
-  color: string;
-  size: number;
-}) {
+}: FishProps) {
   return (
     <div
       className="absolute"
@@ -44,7 +45,11 @@ function Fish({
   );
 }
 
-function Bubble({ left, delay }: { left: string; delay: number }) {
+interface BubbleProps {
+  left: string;
+  delay: number;
+}
+function Bubble({ left, delay }: BubbleProps) {
   return (
     <div
       className="absolute bottom-6 h-2 w-2 rounded-full bg-white/50"
@@ -53,7 +58,10 @@ function Bubble({ left, delay }: { left: string; delay: number }) {
   );
 }
 
-export function LoadingSplash({ onCancel }: { onCancel: () => void }) {
+interface LoadingSplashProps {
+  onCancel: () => void;
+}
+export function LoadingSplash({ onCancel }: LoadingSplashProps) {
   const [msg, setMsg] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setMsg((m) => (m + 1) % MESSAGES.length), 1800);

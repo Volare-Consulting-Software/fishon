@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
-export function CopyButton({ value }: { value: string }) {
+interface CopyButtonProps {
+  value: string;
+}
+export function CopyButton({ value }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
   return (
     <button

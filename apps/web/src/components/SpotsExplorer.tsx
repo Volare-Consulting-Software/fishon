@@ -20,13 +20,12 @@ const SpotsMap = dynamic(() => import("./SpotsMap"), {
   ),
 });
 
-export function SpotsExplorer({
-  center,
-  spots,
-}: {
+interface SpotsExplorerProps {
   center: GeoLocation;
   spots: FishingSpot[];
-}) {
+}
+
+export function SpotsExplorer({ center, spots }: SpotsExplorerProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [fitKey, setFitKey] = useState(0);
@@ -122,6 +121,15 @@ export function SpotsExplorer({
   );
 }
 
+interface SpotsDrawerProps {
+  open: boolean;
+  spots: FishingSpot[];
+  selected: number | null;
+  rowRefs: React.RefObject<(HTMLLIElement | null)[]>;
+  onClose: () => void;
+  onSelect: (index: number) => void;
+}
+
 function SpotsDrawer({
   open,
   spots,
@@ -129,14 +137,7 @@ function SpotsDrawer({
   rowRefs,
   onClose,
   onSelect,
-}: {
-  open: boolean;
-  spots: FishingSpot[];
-  selected: number | null;
-  rowRefs: React.RefObject<(HTMLLIElement | null)[]>;
-  onClose: () => void;
-  onSelect: (index: number) => void;
-}) {
+}: SpotsDrawerProps) {
   return (
     <>
       <div

@@ -143,11 +143,12 @@ const tooltipStyle = {
 };
 const chartMargin = { top: 16, right: 12, bottom: 0, left: 0 };
 
-function WindArrow(props: {
+interface WindArrowProps {
   cx?: number;
   cy?: number;
   payload?: { windDirDeg?: number | null };
-}) {
+}
+function WindArrow(props: WindArrowProps) {
   const { cx, cy, payload } = props;
   if (cx === undefined || cy === undefined) return <g key={`${cx}-${cy}`} />;
   const angle = (payload?.windDirDeg ?? 0) + 180;
@@ -170,15 +171,16 @@ function compassOf(deg?: number | null, fallback?: string | null): string {
   return COMPASS16[Math.round(deg / 22.5) % 16] ?? "";
 }
 
+interface DayChartsProps {
+  tides: TidePrediction[];
+  periods: ForecastRow[];
+  hourlyWind?: HourlyWindPoint[];
+}
 export function DayCharts({
   tides,
   periods,
   hourlyWind,
-}: {
-  tides: TidePrediction[];
-  periods: ForecastRow[];
-  hourlyWind?: HourlyWindPoint[];
-}) {
+}: DayChartsProps) {
   const tide = tideSeries(tides ?? []);
   const safePeriods = periods ?? [];
   const hourly: WindPoint[] = (hourlyWind ?? []).map((p) => ({
@@ -291,13 +293,14 @@ export function DayCharts({
   );
 }
 
+interface ChartBlockProps {
+  title: string;
+  children: React.ReactElement;
+}
 function ChartBlock({
   title,
   children,
-}: {
-  title: string;
-  children: React.ReactElement;
-}) {
+}: ChartBlockProps) {
   return (
     <div>
       <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-3">
