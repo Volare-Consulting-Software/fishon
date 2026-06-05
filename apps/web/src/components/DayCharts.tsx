@@ -19,7 +19,9 @@ import {
 } from "recharts";
 
 const BRAND = "#5e27d2";
-const WAVE = "#1e6fb8";
+// Wave uses the deeper brand purple so it reads distinct from the tide curve
+// while staying on-brand.
+const WAVE = "#4a1eb0";
 const AXIS = "#9c97aa";
 const GRID = "#ece9f3";
 

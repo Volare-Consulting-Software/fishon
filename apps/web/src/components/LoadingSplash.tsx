@@ -62,11 +62,11 @@ export function LoadingSplash({ onCancel }: { onCancel: () => void }) {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative h-56 w-full overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-[#2a6db5] to-[#0d3b66]">
-        <Fish top="20%" duration={9} delay={0} color="#ffd166" size={44} />
-        <Fish top="45%" duration={12} delay={1.5} color="#ef6f6c" size={32} />
-        <Fish top="62%" duration={7.5} delay={0.6} color="#9ad1d4" size={52} />
-        <Fish top="78%" duration={14} delay={2.4} color="#f4a261" size={28} />
+      <div className="relative h-56 w-full overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-[#6b3fd9] to-[#2e1670]">
+        <Fish top="20%" duration={9} delay={0} color="#efeaff" size={44} />
+        <Fish top="45%" duration={12} delay={1.5} color="#c9b8f0" size={32} />
+        <Fish top="62%" duration={7.5} delay={0.6} color="#ffffff" size={52} />
+        <Fish top="78%" duration={14} delay={2.4} color="#b9a3ee" size={28} />
         {["12%", "28%", "55%", "73%", "88%"].map((l, i) => (
           <Bubble key={l} left={l} delay={i * 0.5} />
         ))}

@@ -15,10 +15,12 @@
   --color-raised: #faf9fd;
   --color-sunken: #f1eff7;
 
-  --color-success: #1f9d55;
-  --color-warning: #c77700;
-  --color-error: #d93030;
-  --color-info: #1e6fb8;
+  /* On-brand only: state accents are shades of the Volare purple (meaning is
+     carried by the shade + label, not by off-brand hues). */
+  --color-success: #5e27d2;
+  --color-warning: #6f6685;
+  --color-error: #4a1eb0;
+  --color-info: #5e27d2;
 
   --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
 }
