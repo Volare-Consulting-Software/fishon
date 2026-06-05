@@ -1,15 +1,15 @@
 export { TOKENS } from "./tokens";
-export type { IHttpClient } from "./iHttpClient";
-export type { IGeocoder } from "./iGeocoder";
-export type { ITideProvider } from "./iTideProvider";
-export type { IMoonPhaseProvider } from "./iMoonPhaseProvider";
-export type { IWeatherScraper } from "./iWeatherScraper";
-export type { ILogger } from "./iLogger";
-export type { IFishingSpotProvider } from "./iFishingSpotProvider";
-export type { ISpeciesProvider } from "./iSpeciesProvider";
-export type { ISpeciesEnrichmentProvider } from "./iSpeciesEnrichmentProvider";
+export type { HttpClient } from "./httpClient";
+export type { Geocoder } from "./geocoder";
+export type { TideProvider } from "./tideProvider";
+export type { MoonPhaseProvider } from "./moonPhaseProvider";
+export type { WeatherScraper } from "./weatherScraper";
+export type { Logger } from "./logger";
+export type { FishingSpotProvider } from "./fishingSpotProvider";
+export type { SpeciesProvider } from "./speciesProvider";
+export type { SpeciesEnrichmentProvider } from "./speciesEnrichmentProvider";
 export type {
-  ISpeciesRegulationsProvider,
+  SpeciesRegulationsProvider,
   SpeciesNameRef,
-} from "./iSpeciesRegulationsProvider";
-export type { IMarineHourlyProvider } from "./iMarineHourlyProvider";
+} from "./speciesRegulationsProvider";
+export type { MarineHourlyProvider } from "./marineHourlyProvider";

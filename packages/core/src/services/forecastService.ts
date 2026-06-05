@@ -1,20 +1,20 @@
 import { inject, injectable } from "tsyringe";
 import {
   TOKENS,
-  IWeatherScraper,
-  ITideProvider,
-  IMoonPhaseProvider,
-  ILogger,
+  WeatherScraper,
+  TideProvider,
+  MoonPhaseProvider,
+  Logger,
 } from "../interfaces";
 import { ForecastResult } from "../types/forecastResult";
 
 @injectable()
 export class ForecastService {
   constructor(
-    @inject(TOKENS.IWeatherScraper) private readonly weatherScraper: IWeatherScraper,
-    @inject(TOKENS.ITideProvider) private readonly tideProvider: ITideProvider,
-    @inject(TOKENS.IMoonPhaseProvider) private readonly moonProvider: IMoonPhaseProvider,
-    @inject(TOKENS.ILogger) private readonly logger: ILogger
+    @inject(TOKENS.WeatherScraper) private readonly weatherScraper: WeatherScraper,
+    @inject(TOKENS.TideProvider) private readonly tideProvider: TideProvider,
+    @inject(TOKENS.MoonPhaseProvider) private readonly moonProvider: MoonPhaseProvider,
+    @inject(TOKENS.Logger) private readonly logger: Logger
   ) {}
 
   async getForecast(

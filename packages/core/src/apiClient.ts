@@ -7,13 +7,13 @@ import { SpeciesProfile } from "./types/speciesProfile";
 // The MCP server's "API mode": instead of resolving core services directly, it
 // calls the hosted HTTP endpoints — which are themselves thin wrappers over the
 // same core services. Embedded mode and API mode therefore can't diverge.
-export class FishweatherApiClient {
+export class FishonApiClient {
   constructor(private readonly baseUrl: string) {}
 
   private async getJson<T>(path: string): Promise<T> {
     const res = await fetch(`${this.baseUrl}${path}`);
     if (!res.ok) {
-      throw new Error(`Fishweather API ${path} responded ${res.status}`);
+      throw new Error(`Fishon API ${path} responded ${res.status}`);
     }
     return (await res.json()) as T;
   }

@@ -1,5 +1,5 @@
 import { FishingSpot } from "../types/fishingSpot";
 
-export interface IFishingSpotProvider {
+export interface FishingSpotProvider {
   getSpots(location: string, radiusMiles: number): Promise<FishingSpot[]>;
 }

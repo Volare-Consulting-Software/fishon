@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   container,
   TOKENS,
-  type IGeocoder,
+  type Geocoder,
 } from "@volare-consulting/fishon";
 
 export const runtime = "nodejs";
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   if (q.trim().length < 3) return NextResponse.json([]);
   try {
     const suggestions = await container
-      .resolve<IGeocoder>(TOKENS.IGeocoder)
+      .resolve<Geocoder>(TOKENS.Geocoder)
       .suggest(q);
     return NextResponse.json(suggestions);
   } catch (err) {

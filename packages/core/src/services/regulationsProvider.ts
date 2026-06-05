@@ -1,9 +1,9 @@
 import { inject, injectable } from "tsyringe";
 import {
   TOKENS,
-  IHttpClient,
-  ILogger,
-  ISpeciesRegulationsProvider,
+  HttpClient,
+  Logger,
+  SpeciesRegulationsProvider,
   SpeciesNameRef,
 } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
@@ -19,14 +19,14 @@ import {
 // FISHRULES_API_KEY env vars and degrade gracefully to an empty map otherwise,
 // so the public site keeps working without anyone's credentials.
 @injectable()
-export class RegulationsProvider implements ISpeciesRegulationsProvider {
+export class RegulationsProvider implements SpeciesRegulationsProvider {
   private locationCache = new Map<string, FishRulesLocationEntry[]>();
   private detailCache = new Map<string, SpeciesRegulation | null>();
 
   constructor(
-    @inject(TOKENS.IHttpClient) private readonly httpClient: IHttpClient,
+    @inject(TOKENS.HttpClient) private readonly httpClient: HttpClient,
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig,
-    @inject(TOKENS.ILogger) private readonly logger: ILogger
+    @inject(TOKENS.Logger) private readonly logger: Logger
   ) {}
 
   private credentials(): { clientId: string; apiKey: string } | null {

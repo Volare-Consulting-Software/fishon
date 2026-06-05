@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { IMoonPhaseProvider } from "../interfaces";
+import { MoonPhaseProvider } from "../interfaces";
 import { MoonPhase } from "../types/moonPhase";
 import { MoonPhaseInfo, MoonPhaseMap } from "../types/moon";
 
@@ -7,7 +7,7 @@ const SYNODIC_MONTH = 29.53059;
 const KNOWN_NEW_MOON = new Date("2000-01-06T18:14:00Z");
 
 @injectable()
-export class MoonPhaseProvider implements IMoonPhaseProvider {
+export class SynodicMoonPhaseProvider implements MoonPhaseProvider {
   getPhase(date: Date | string): MoonPhaseInfo {
     const d = new Date(date);
     d.setHours(12, 0, 0, 0);

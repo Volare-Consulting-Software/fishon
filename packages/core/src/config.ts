@@ -134,5 +134,5 @@ export const DEFAULT_CONFIG: ForecastServiceConfig = {
   weatherGovApiUrl: "https://api.weather.gov",
 
   userAgent:
-    "fishweather/1.1 (+https://github.com/volare-consulting-software/fishweather)",
+    "fishon/1.1 (+https://github.com/volare-consulting-software/fishon)",
 };

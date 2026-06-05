@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { chromium, Browser, Page } from "playwright";
-import { TOKENS, ILogger } from "../interfaces";
+import { TOKENS, Logger } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
 import { Station } from "../types/station";
 import { ScrapedData } from "../types/scrapedData";
@@ -15,7 +15,7 @@ const COMPASS_DIRECTIONS = [
 export class FishweatherScraper {
   constructor(
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig,
-    @inject(TOKENS.ILogger) private readonly logger: ILogger
+    @inject(TOKENS.Logger) private readonly logger: Logger
   ) {}
 
   async getForecast(

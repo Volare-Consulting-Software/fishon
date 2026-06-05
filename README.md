@@ -1,4 +1,4 @@
-# FishWeather Forecast & Tides
+# FishOn — Fishing Forecast & Tides
 
 A Node.js tool for fishing forecasts. Combines 7-day wind, wave, and weather data from [FishWeather](https://fishweather.com) with NOAA tide predictions and moon phase calculations. Provide a location and it finds the nearest stations automatically. Available as a CLI, Node.js library, and MCP server for Claude Code.
 
@@ -25,15 +25,15 @@ A Node.js tool for fishing forecasts. Combines 7-day wind, wave, and weather dat
 ## Install from npm
 
 ```bash
-npm install -g @volare-consulting/fishweather-forecast
+npm install -g @volare-consulting/fishon
 npx playwright install chromium
-fishweather "southport, nc"
+fishon "southport, nc"
 ```
 
 Or use via `npx` without installing:
 
 ```bash
-npx @volare-consulting/fishweather-forecast "key west, fl"
+npx @volare-consulting/fishon "key west, fl"
 ```
 
 ## Setup (from source)
@@ -41,8 +41,8 @@ npx @volare-consulting/fishweather-forecast "key west, fl"
 Requires [Node.js](https://nodejs.org/) (v18+).
 
 ```bash
-git clone https://github.com/volare-consulting-software/fishweather.git
-cd fishweather
+git clone https://github.com/volare-consulting-software/fishon.git
+cd fishon
 npm install
 npx playwright install chromium
 ```
@@ -190,7 +190,7 @@ This package runs as an [MCP](https://modelcontextprotocol.io/) server, exposing
 **Via npm (recommended):**
 
 ```bash
-claude mcp add --transport stdio fishweather -- npx @volare-consulting/fishweather-forecast --mcp
+claude mcp add --transport stdio fishon -- npx @volare-consulting/fishon --mcp
 ```
 
 **Via local source (this repo):**
@@ -202,10 +202,10 @@ The project root `.mcp.json` is already configured. After setup, restart Claude 
 ```json
 {
   "mcpServers": {
-    "fishweather": {
+    "fishon": {
       "type": "stdio",
       "command": "npx",
-      "args": ["@volare-consulting/fishweather-forecast", "--mcp"]
+      "args": ["@volare-consulting/fishon", "--mcp"]
     }
   }
 }

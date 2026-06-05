@@ -2,13 +2,13 @@ import {
   container,
   TOKENS,
   ForecastService,
-  type IGeocoder,
-  type ITideProvider,
-  type IMoonPhaseProvider,
-  type IFishingSpotProvider,
-  type ISpeciesProvider,
-  type ISpeciesEnrichmentProvider,
-  type IMarineHourlyProvider,
+  type Geocoder,
+  type TideProvider,
+  type MoonPhaseProvider,
+  type FishingSpotProvider,
+  type SpeciesProvider,
+  type SpeciesEnrichmentProvider,
+  type MarineHourlyProvider,
 } from "@volare-consulting/fishon";
 import { ReportOrchestrator } from "./reportOrchestrator";
 import { SuggestionService } from "./suggestionService";
@@ -18,15 +18,15 @@ import { SuggestionService } from "./suggestionService";
 export function createOrchestrator(): ReportOrchestrator {
   return new ReportOrchestrator(
     container.resolve(ForecastService),
-    container.resolve<IGeocoder>(TOKENS.IGeocoder),
-    container.resolve<ITideProvider>(TOKENS.ITideProvider),
-    container.resolve<IMoonPhaseProvider>(TOKENS.IMoonPhaseProvider),
-    container.resolve<IFishingSpotProvider>(TOKENS.IFishingSpotProvider),
-    container.resolve<ISpeciesProvider>(TOKENS.ISpeciesProvider),
-    container.resolve<ISpeciesEnrichmentProvider>(
-      TOKENS.ISpeciesEnrichmentProvider
+    container.resolve<Geocoder>(TOKENS.Geocoder),
+    container.resolve<TideProvider>(TOKENS.TideProvider),
+    container.resolve<MoonPhaseProvider>(TOKENS.MoonPhaseProvider),
+    container.resolve<FishingSpotProvider>(TOKENS.FishingSpotProvider),
+    container.resolve<SpeciesProvider>(TOKENS.SpeciesProvider),
+    container.resolve<SpeciesEnrichmentProvider>(
+      TOKENS.SpeciesEnrichmentProvider
     ),
-    container.resolve<IMarineHourlyProvider>(TOKENS.IMarineHourlyProvider),
+    container.resolve<MarineHourlyProvider>(TOKENS.MarineHourlyProvider),
     new SuggestionService()
   );
 }

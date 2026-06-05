@@ -7,14 +7,14 @@ import { z } from "zod";
 import { ForecastService } from "./services/forecastService";
 import {
   TOKENS,
-  IGeocoder,
-  ITideProvider,
-  IFishingSpotProvider,
-  ISpeciesProvider,
-  ISpeciesEnrichmentProvider,
-  IMarineHourlyProvider,
+  Geocoder,
+  TideProvider,
+  FishingSpotProvider,
+  SpeciesProvider,
+  SpeciesEnrichmentProvider,
+  MarineHourlyProvider,
 } from "./interfaces";
-import { FishweatherApiClient } from "./apiClient";
+import { FishonApiClient } from "./apiClient";
 import { ForecastResult } from "./types/forecastResult";
 import { TideResult } from "./types/tide";
 import { FishingSpot } from "./types/fishingSpot";
@@ -34,7 +34,7 @@ const PROFILE_SPECIES_COUNT = 8;
 // One data-source contract, two transports. In embedded mode the methods
 // resolve the core services directly; in API mode they call the public HTTP
 // endpoints — which are themselves thin wrappers over the same core services.
-interface FishweatherDataSource {
+interface FishonDataSource {
   getForecast(location: string): Promise<ForecastResult>;
   getTides(location: string, days: number): Promise<TideResult>;
   getSpots(location: string, radiusMiles: number): Promise<FishingSpot[]>;
@@ -44,16 +44,16 @@ interface FishweatherDataSource {
 }
 
 async function embeddedHourlyWind(location: string): Promise<HourlyWindResult> {
-  const geo = await container.resolve<IGeocoder>(TOKENS.IGeocoder).geocode(location);
+  const geo = await container.resolve<Geocoder>(TOKENS.Geocoder).geocode(location);
   return container
-    .resolve<IMarineHourlyProvider>(TOKENS.IMarineHourlyProvider)
+    .resolve<MarineHourlyProvider>(TOKENS.MarineHourlyProvider)
     .getHourlyWind(geo.lat, geo.lng);
 }
 
-function createDataSource(): FishweatherDataSource {
-  const apiBaseUrl = process.env["FISHWEATHER_API_BASE_URL"];
+function createDataSource(): FishonDataSource {
+  const apiBaseUrl = process.env["FISHON_API_BASE_URL"];
   if (apiBaseUrl) {
-    const client = new FishweatherApiClient(apiBaseUrl);
+    const client = new FishonApiClient(apiBaseUrl);
     return {
       getForecast: (location) => client.getForecast(location),
       getTides: (location, days) => client.getTides(location, days),
@@ -67,24 +67,24 @@ function createDataSource(): FishweatherDataSource {
     getForecast: (location) =>
       container.resolve(ForecastService).getForecast(location),
     getTides: (location, days) =>
-      container.resolve<ITideProvider>(TOKENS.ITideProvider).getTides(location, days),
+      container.resolve<TideProvider>(TOKENS.TideProvider).getTides(location, days),
     getSpots: (location, radiusMiles) =>
       container
-        .resolve<IFishingSpotProvider>(TOKENS.IFishingSpotProvider)
+        .resolve<FishingSpotProvider>(TOKENS.FishingSpotProvider)
         .getSpots(location, radiusMiles),
     getSpecies: (location) =>
       container
-        .resolve<ISpeciesProvider>(TOKENS.ISpeciesProvider)
+        .resolve<SpeciesProvider>(TOKENS.SpeciesProvider)
         .getSpecies(location),
     getSpeciesProfiles: async (location) => {
       const [geo, species] = await Promise.all([
-        container.resolve<IGeocoder>(TOKENS.IGeocoder).geocode(location),
+        container.resolve<Geocoder>(TOKENS.Geocoder).geocode(location),
         container
-          .resolve<ISpeciesProvider>(TOKENS.ISpeciesProvider)
+          .resolve<SpeciesProvider>(TOKENS.SpeciesProvider)
           .getSpecies(location),
       ]);
       return container
-        .resolve<ISpeciesEnrichmentProvider>(TOKENS.ISpeciesEnrichmentProvider)
+        .resolve<SpeciesEnrichmentProvider>(TOKENS.SpeciesEnrichmentProvider)
         .enrich(species.slice(0, PROFILE_SPECIES_COUNT), geo);
     },
     getHourlyWind: (location) => embeddedHourlyWind(location),
@@ -121,7 +121,7 @@ function errorContent(err: unknown) {
 }
 
 const server = new McpServer({
-  name: "fishweather",
+  name: "fishon",
   version: "1.1.0",
 });
 

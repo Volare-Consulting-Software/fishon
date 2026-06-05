@@ -1,9 +1,9 @@
 import https from "https";
 import { injectable } from "tsyringe";
-import { IHttpClient } from "../interfaces";
+import { HttpClient } from "../interfaces";
 
 @injectable()
-export class HttpClient implements IHttpClient {
+export class NodeHttpsClient implements HttpClient {
   get<T>(url: string, headers?: Record<string, string>): Promise<T> {
     return new Promise((resolve, reject) => {
       https

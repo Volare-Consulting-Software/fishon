@@ -3,24 +3,24 @@ import "reflect-metadata";
 import "./container";
 import { container } from "tsyringe";
 import { ForecastService } from "./services/forecastService";
-import { TOKENS, ITideProvider } from "./interfaces";
+import { TOKENS, TideProvider } from "./interfaces";
 import {
   formatForecastTable,
   formatTideReport,
 } from "./formatters/forecastFormatter";
 
 function printUsage(): void {
-  console.log("Usage: fishweather <location> [options]");
+  console.log("Usage: fishon <location> [options]");
   console.log("");
   console.log("  Searches FishWeather for the given location and pulls the");
   console.log("  7-day wind/wave forecast from the first free station found.");
   console.log("  Includes NOAA tide predictions and moon phase data.");
   console.log("");
   console.log("Examples:");
-  console.log('  fishweather "southport, nc"');
-  console.log('  fishweather "key west, fl" --json');
-  console.log('  fishweather "outer banks" --visible');
-  console.log('  fishweather "southport, nc" --tides');
+  console.log('  fishon "southport, nc"');
+  console.log('  fishon "key west, fl" --json');
+  console.log('  fishon "outer banks" --visible');
+  console.log('  fishon "southport, nc" --tides');
   console.log("");
   console.log("Options:");
   console.log("  --json       Output as JSON instead of a table");
@@ -50,7 +50,7 @@ async function main(): Promise<void> {
   try {
     if (tidesOnly) {
       console.log(`Fetching tides near "${location}"...`);
-      const tideProvider = container.resolve<ITideProvider>(TOKENS.ITideProvider);
+      const tideProvider = container.resolve<TideProvider>(TOKENS.TideProvider);
       const result = await tideProvider.getTides(location);
       if (outputJson) {
         console.log(JSON.stringify(result, null, 2));

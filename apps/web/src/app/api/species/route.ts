@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   container,
   TOKENS,
-  type ISpeciesProvider,
+  type SpeciesProvider,
 } from "@volare-consulting/fishon";
 
 export const runtime = "nodejs";
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   }
   try {
     const result = await container
-      .resolve<ISpeciesProvider>(TOKENS.ISpeciesProvider)
+      .resolve<SpeciesProvider>(TOKENS.SpeciesProvider)
       .getSpecies(location);
     return NextResponse.json(result);
   } catch (err) {
