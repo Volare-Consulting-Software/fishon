@@ -5,6 +5,7 @@ import {
   Logger,
   SpeciesEnrichmentProvider,
   SpeciesRegulationsProvider,
+  FishRulesClient,
 } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
 import { FishSpecies } from "../types/fishSpecies";
@@ -14,6 +15,7 @@ import {
   EdibilityRating,
   SpeciesRegulation,
 } from "../types/speciesProfile";
+import { rateFishRulesEdibility, EdibilityVerdict } from "./edibility";
 
 interface NaturalistTaxaResponse {
   results?: Array<{
@@ -33,7 +35,9 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig,
     @inject(TOKENS.Logger) private readonly logger: Logger,
     @inject(TOKENS.SpeciesRegulationsProvider)
-    private readonly regulations: SpeciesRegulationsProvider
+    private readonly regulations: SpeciesRegulationsProvider,
+    @inject(TOKENS.FishRulesClient)
+    private readonly fishRules: FishRulesClient
   ) {}
 
   async enrich(
@@ -47,6 +51,9 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
       species.map((s) => ({
         commonName: s.commonName,
         scientificName: s.scientificName,
+        ...(s.regulationId !== undefined
+          ? { regulationId: s.regulationId }
+          : {}),
       })),
       geo.lat,
       geo.lng
@@ -54,13 +61,20 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
 
     return Promise.all(
       species.map(async (fish) => {
-        const [photo, summary] = await Promise.all([
-          this.photo(fish.scientificName),
-          this.summary(fish.scientificName),
-        ]);
-        const { edibility, edibilityNote } = deriveEdibility(summary);
         const regulation: SpeciesRegulation | undefined = regMap.get(
           fish.scientificName.toLowerCase()
+        );
+
+        // Fish Rules supplies a species photo and an authoritative edibility
+        // note; fall back to iNaturalist/Wikipedia only when it doesn't.
+        const summary = await this.summary(fish.scientificName);
+        const photo: { url?: string; attribution?: string } =
+          regulation !== undefined
+            ? { url: this.fishRules.imageUrl(regulation.fishId) }
+            : await this.photo(fish.scientificName);
+        const { edibility, edibilityNote } = resolveEdibility(
+          regulation,
+          summary
         );
 
         return {
@@ -110,6 +124,18 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
       return undefined;
     }
   }
+}
+
+// Prefer Fish Rules' own edibility note (per-species, semi-authoritative);
+// otherwise fall back to the Wikipedia-derived heuristic.
+function resolveEdibility(
+  regulation: SpeciesRegulation | undefined,
+  summary: string | undefined
+): EdibilityVerdict {
+  if (regulation?.edibilityNote) {
+    return rateFishRulesEdibility(regulation.edibilityNote);
+  }
+  return deriveEdibility(summary);
 }
 
 // Wikipedia descriptions aren't a regulatory edibility source, but they reliably

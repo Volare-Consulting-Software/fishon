@@ -191,10 +191,10 @@ server.tool(
 
 server.tool(
   "get_species",
-  "Get fish species recorded near a given location, ranked by occurrence " +
-    "count. Uses OBIS marine occurrence data (so results are real local fish) " +
-    "with English common names from WoRMS. Useful for grounding suggestions " +
-    "about what is realistically catchable in the area.",
+  "Get fish species you can target near a given location. Uses the Fish Rules " +
+    "per-area regulation list (the species actually managed there), falling " +
+    "back to OBIS marine occurrence data where Fish Rules has no coverage. " +
+    "Useful for grounding suggestions about what is realistically catchable.",
   { location: locationArg },
   async ({ location }) => {
     try {
@@ -208,11 +208,11 @@ server.tool(
 
 server.tool(
   "get_species_profiles",
-  "Get enriched profiles for the top fish species near a location: a photo " +
-    "(iNaturalist), a short description (Wikipedia), a non-official edibility " +
-    "rating derived from the description, regulations (bag/size where Fish Rules " +
-    "credentials are configured), and an outbound link to the official state " +
-    "recreational regulations.",
+  "Get enriched profiles for the top fish species near a location: a photo, a " +
+    "short description (Wikipedia), an edibility rating, and Fish Rules " +
+    "regulations — bag limit, min/max & slot size, measurement type, and " +
+    "season status (open / out-of-season / no-harvest) for the location — plus " +
+    "an outbound link to the official state recreational regulations.",
   { location: locationArg },
   async ({ location }) => {
     try {

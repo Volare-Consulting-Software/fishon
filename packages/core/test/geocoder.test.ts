@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Mock, It } from "moq.ts";
-import { IHttpClient } from "../src/interfaces";
+import { HttpClient } from "../src/interfaces";
 import { ArcGisGeocoder } from "../src/services/geocoder";
 import { GeocodeResponse } from "../src/types/noaa";
 import { registerMocks, container } from "./testContainer";
@@ -12,11 +12,11 @@ const SOUTHPORT_STATE = "NC";
 
 describe("ArcGisGeocoder", () => {
   let geocoder: ArcGisGeocoder;
-  let httpClientMock: Mock<IHttpClient>;
+  let httpClientMock: Mock<HttpClient>;
 
   beforeEach(() => {
-    httpClientMock = new Mock<IHttpClient>();
-    registerMocks({ IHttpClient: httpClientMock });
+    httpClientMock = new Mock<HttpClient>();
+    registerMocks({ HttpClient: httpClientMock });
     geocoder = container.resolve(ArcGisGeocoder);
   });
 

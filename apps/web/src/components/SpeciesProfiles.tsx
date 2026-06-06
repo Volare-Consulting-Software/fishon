@@ -3,8 +3,18 @@ import type {
   EdibilityRating,
 } from "@volare-consulting/fishon";
 import { ExternalLink, Fish } from "lucide-react";
+import { FishImage } from "./FishImage";
 
 const FISH_RULES_URL = "https://app.fishrulesapp.com/";
+
+// Deep-link to the species' regulation page when we know its id, else the home.
+function fishRulesLink(profile: SpeciesProfile): string {
+  const id = profile.regulation?.regulationId;
+  if (id === undefined) return FISH_RULES_URL;
+  return `https://app.fishrulesapp.com/regulations/${id}?species=${encodeURIComponent(
+    profile.commonName
+  )}`;
+}
 
 const EDIBILITY: Record<EdibilityRating, { label: string; className: string }> = {
   yum: { label: "Yum", className: "border-success/40 bg-success/10 text-success" },
@@ -34,25 +44,78 @@ interface RegulationChipsProps {
   profile: SpeciesProfile;
 }
 
+const REG_CHIP = "border-brand/30 bg-brand-subtle text-brand";
+
+function StatusChip({ profile }: RegulationChipsProps) {
+  const reg = profile.regulation;
+  if (!reg) return null;
+  switch (reg.status) {
+    case "prohibited":
+      return (
+        <Chip
+          className="border-error/40 bg-error/10 text-error"
+          title={`No harvest · ${reg.locationName}`}
+        >
+          No harvest
+        </Chip>
+      );
+    case "out-of-season":
+      return (
+        <Chip
+          className="border-warning/40 bg-warning/10 text-warning"
+          title={`Closed season right now · ${reg.locationName}`}
+        >
+          Out of season
+        </Chip>
+      );
+    default:
+      return (
+        <Chip
+          className="border-success/40 bg-success/10 text-success"
+          title={`Open season · ${reg.locationName}`}
+        >
+          Open
+        </Chip>
+      );
+  }
+}
+
 function RegulationChips({ profile }: RegulationChipsProps) {
   const reg = profile.regulation;
   if (!reg) return null;
+  const unit = reg.sizeUnit ?? "in";
   return (
     <>
-      {reg.status === "prohibited" ? (
-        <Chip className="border-error/40 bg-error/10 text-error">No harvest</Chip>
-      ) : (
-        <Chip className="border-success/40 bg-success/10 text-success">Open</Chip>
-      )}
+      <StatusChip profile={profile} />
       {reg.bagLimit !== null && (
-        <Chip className="border-brand/30 bg-brand-subtle text-brand" title={`Daily bag limit · ${reg.locationName}`}>
+        <Chip className={REG_CHIP} title={`Daily bag limit · ${reg.locationName}`}>
           Bag {reg.bagLimit}
         </Chip>
       )}
       {reg.minSize !== null && (
-        <Chip className="border-brand/30 bg-brand-subtle text-brand" title={`Minimum size · ${reg.locationName}`}>
+        <Chip className={REG_CHIP} title={`Minimum size · ${reg.locationName}`}>
           Min {reg.minSize}
-          {reg.sizeUnit ?? "in"}
+          {unit}
+        </Chip>
+      )}
+      {reg.maxSize !== null && (
+        <Chip className={REG_CHIP} title={`Maximum size · ${reg.locationName}`}>
+          Max {reg.maxSize}
+          {unit}
+        </Chip>
+      )}
+      {reg.minSlotSize !== null && reg.maxSlotSize !== null && (
+        <Chip className={REG_CHIP} title={`Slot limit · ${reg.locationName}`}>
+          Slot {reg.minSlotSize}–{reg.maxSlotSize}
+          {unit}
+        </Chip>
+      )}
+      {reg.measurementName && (
+        <Chip
+          className="border-line bg-sunken text-ink-2"
+          title="How length is measured"
+        >
+          {reg.measurementName}
         </Chip>
       )}
     </>
@@ -81,21 +144,14 @@ export function SpeciesProfiles({ profiles }: SpeciesProfilesProps) {
           return (
             <a
               key={profile.scientificName}
-              href={FISH_RULES_URL}
+              href={fishRulesLink(profile)}
               target="_blank"
               rel="noopener noreferrer"
               title={`Look up ${profile.commonName} in Fish Rules`}
               className="group flex flex-col overflow-hidden rounded-lg border border-line bg-surface transition hover:border-brand hover:shadow-sm"
             >
               <div className="relative h-36 w-full bg-sunken">
-                {profile.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={profile.imageUrl} alt={profile.commonName} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-ink-3">
-                    <Fish className="h-8 w-8" />
-                  </div>
-                )}
+                <FishImage src={profile.imageUrl} alt={profile.commonName} />
               </div>
               <div className="flex flex-1 flex-col gap-2 p-3">
                 <div>
@@ -124,7 +180,7 @@ export function SpeciesProfiles({ profiles }: SpeciesProfilesProps) {
       {regulations && (
         <p className="mt-3 text-xs text-ink-2">
           {hasFishRules
-            ? "Bag/size shown for your location via Fish Rules — confirm seasons & full rules: "
+            ? "Season, bag & size shown for your location via Fish Rules — always confirm the full rules: "
             : "Always confirm current size, bag, and season limits before keeping fish: "}
           <a
             href={regulations.regulationsUrl}
@@ -138,8 +194,8 @@ export function SpeciesProfiles({ profiles }: SpeciesProfilesProps) {
         </p>
       )}
       <p className="mt-1 text-xs text-ink-3">
-        Photos via iNaturalist; descriptions via Wikipedia. Edibility is derived
-        from descriptions and is not official.
+        Regulations & photos via Fish Rules; descriptions via Wikipedia.
+        Edibility is a non-official, best-effort signal — verify locally.
       </p>
     </div>
   );

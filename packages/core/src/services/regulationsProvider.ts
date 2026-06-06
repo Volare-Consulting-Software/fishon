@@ -1,39 +1,31 @@
 import { inject, injectable } from "tsyringe";
 import {
   TOKENS,
-  HttpClient,
   Logger,
   SpeciesRegulationsProvider,
   SpeciesNameRef,
+  FishRulesClient,
 } from "../interfaces";
-import { ForecastServiceConfig } from "../config";
 import { SpeciesRegulation } from "../types/speciesProfile";
 import {
-  FishRulesLocationResponse,
   FishRulesLocationEntry,
-  FishRulesSpeciesResponse,
+  FishRulesRegulationDetail,
 } from "../types/fishRules";
+import { resolveSeasonStatus, toRegulationSeasons } from "./seasonStatus";
+import { normalizeCommonName, scientificFromSynonyms } from "./speciesNames";
+import { stripHtml } from "./edibility";
 
-// Fish Rules is partner-gated (every uncached coordinate returns 401 without a
-// client-id/api-key). We integrate behind FISHRULES_CLIENT_ID +
-// FISHRULES_API_KEY env vars and degrade gracefully to an empty map otherwise,
-// so the public site keeps working without anyone's credentials.
+// Builds rich per-species regulations (bag, size, slot, measurement, seasons,
+// prohibited) from Fish Rules. Species sourced from Fish Rules already carry a
+// regulationId, so we fetch detail directly; species from the OBIS fallback are
+// matched against the area list by scientific name (then common name).
 @injectable()
 export class RegulationsProvider implements SpeciesRegulationsProvider {
-  private locationCache = new Map<string, FishRulesLocationEntry[]>();
-  private detailCache = new Map<string, SpeciesRegulation | null>();
-
   constructor(
-    @inject(TOKENS.HttpClient) private readonly httpClient: HttpClient,
-    @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig,
+    @inject(TOKENS.FishRulesClient)
+    private readonly fishRules: FishRulesClient,
     @inject(TOKENS.Logger) private readonly logger: Logger
   ) {}
-
-  private credentials(): { clientId: string; apiKey: string } | null {
-    const clientId = process.env["FISHRULES_CLIENT_ID"];
-    const apiKey = process.env["FISHRULES_API_KEY"];
-    return clientId && apiKey ? { clientId, apiKey } : null;
-  }
 
   async getRegulations(
     species: SpeciesNameRef[],
@@ -41,24 +33,20 @@ export class RegulationsProvider implements SpeciesRegulationsProvider {
     lng: number
   ): Promise<Map<string, SpeciesRegulation>> {
     const result = new Map<string, SpeciesRegulation>();
-    const creds = this.credentials();
-    if (!creds) return result; // Fish Rules disabled — no keys configured.
+    if (species.length === 0) return result;
 
-    const headers = {
-      "x-client-id": creds.clientId,
-      "x-api-key": creds.apiKey,
-      "User-Agent": this.config.userAgent,
-    };
-
-    const entries = await this.locationEntries(lat, lng, headers);
-    if (entries.length === 0) return result;
-
+    const now = new Date();
+    const entries = await this.fishRules.getAreaSpecies(lat, lng);
     const index = this.buildIndex(entries);
+
     await Promise.all(
       species.map(async (ref) => {
         const entry = this.matchEntry(ref, index);
-        if (!entry) return;
-        const regulation = await this.speciesDetail(entry, lat, lng, headers);
+        const regulationId = ref.regulationId ?? entry?.id;
+        if (regulationId === undefined) return;
+
+        const detail = await this.fishRules.getRegulationDetail(regulationId);
+        const regulation = this.buildRegulation(detail, entry, now);
         if (regulation) {
           result.set(ref.scientificName.toLowerCase(), regulation);
         }
@@ -67,100 +55,75 @@ export class RegulationsProvider implements SpeciesRegulationsProvider {
     return result;
   }
 
-  private async locationEntries(
-    lat: number,
-    lng: number,
-    headers: Record<string, string>
-  ): Promise<FishRulesLocationEntry[]> {
-    const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
-    const cached = this.locationCache.get(key);
-    if (cached) return cached;
-    try {
-      const data = await this.httpClient.get<FishRulesLocationResponse>(
-        `${this.config.fishRulesApiUrl}/location/${lat}/${lng}`,
-        headers
-      );
-      const entries = data.results ?? [];
-      this.locationCache.set(key, entries);
-      return entries;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      this.logger.warn(`Fish Rules location lookup failed: ${message}`);
-      this.locationCache.set(key, []);
-      return [];
-    }
-  }
-
   private buildIndex(
     entries: FishRulesLocationEntry[]
   ): Map<string, FishRulesLocationEntry> {
     const index = new Map<string, FishRulesLocationEntry>();
     for (const entry of entries) {
+      const scientific = scientificFromSynonyms(entry.synonyms);
+      if (scientific) index.set(scientific.toLowerCase(), entry);
       for (const synonym of entry.synonyms ?? []) {
         index.set(synonym.toLowerCase(), entry);
       }
-      index.set(this.normalizeCommon(entry.species), entry);
+      index.set(normalizeCommonName(entry.species), entry);
     }
     return index;
   }
 
-  // Match primarily on scientific name (Fish Rules lists it among synonyms),
-  // falling back to a normalized common name.
   private matchEntry(
     ref: SpeciesNameRef,
     index: Map<string, FishRulesLocationEntry>
   ): FishRulesLocationEntry | undefined {
     return (
       index.get(ref.scientificName.toLowerCase()) ??
-      index.get(this.normalizeCommon(ref.commonName))
+      index.get(normalizeCommonName(ref.commonName))
     );
   }
 
-  // "Amberjack, Greater" -> "greater amberjack"; "black sea bass" -> itself.
-  private normalizeCommon(name: string): string {
-    const trimmed = name.trim().toLowerCase();
-    const comma = trimmed.indexOf(",");
-    if (comma === -1) return trimmed;
-    const head = trimmed.slice(0, comma).trim();
-    const tail = trimmed.slice(comma + 1).trim();
-    return `${tail} ${head}`.trim();
-  }
+  private buildRegulation(
+    detail: FishRulesRegulationDetail | null,
+    entry: FishRulesLocationEntry | undefined,
+    now: Date
+  ): SpeciesRegulation | null {
+    if (!detail && !entry) return null;
 
-  private async speciesDetail(
-    entry: FishRulesLocationEntry,
-    lat: number,
-    lng: number,
-    headers: Record<string, string>
-  ): Promise<SpeciesRegulation | null> {
-    const key = `${entry.fish_id}:${lat.toFixed(3)},${lng.toFixed(3)}`;
-    if (this.detailCache.has(key)) return this.detailCache.get(key) ?? null;
-    try {
-      const data = await this.httpClient.get<FishRulesSpeciesResponse>(
-        `${this.config.fishRulesApiUrl}/species/${entry.fish_id}/${lat}/${lng}`,
-        headers
-      );
-      const detail = data.results?.[0];
-      const prohibited =
-        entry.prohibited === 1 || (detail?.prohibited ?? 0) === 1;
-      const regulation: SpeciesRegulation = {
-        fishId: entry.fish_id,
-        locationName: detail?.location_name ?? entry.location_name,
-        bagLimit: detail?.bag_limit ?? entry.bag_limit,
-        minSize: detail?.min_size ?? null,
-        maxSize: detail?.max_size ?? null,
-        sizeUnit: detail?.measurement_unit ?? null,
-        prohibited,
-        status: prohibited ? "prohibited" : "open",
-      };
-      this.detailCache.set(key, regulation);
-      return regulation;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      this.logger.warn(
-        `Fish Rules species ${entry.fish_id} lookup failed: ${message}`
-      );
-      this.detailCache.set(key, null);
-      return null;
-    }
+    const regulationId = detail?.id ?? entry?.id;
+    const fishId = detail?.fish_id ?? entry?.fish_id;
+    if (regulationId === undefined || fishId === undefined) return null;
+
+    const prohibited = (detail?.prohibited ?? entry?.prohibited ?? 0) === 1;
+    const seasonStatus = detail
+      ? resolveSeasonStatus(detail, now)
+      : prohibited
+        ? "prohibited"
+        : "unknown";
+    const bagLimit =
+      detail?.no_limit_bag === 1
+        ? null
+        : (detail?.bag_limit ?? entry?.bag_limit ?? null);
+    const edibilityNote = stripHtml(detail?.edibility) || undefined;
+
+    return {
+      regulationId,
+      fishId,
+      locationName: detail?.location_name ?? entry?.location_name ?? "",
+      bagLimit,
+      minSize: detail?.min_size ?? null,
+      maxSize: detail?.max_size ?? null,
+      minSlotSize: detail?.min_slot_size ?? null,
+      maxSlotSize: detail?.max_slot_size ?? null,
+      sizeUnit:
+        detail?.measurement_unit ?? detail?.measurement_unit_symbol ?? null,
+      measurementName: detail?.measurement_name ?? null,
+      prohibited,
+      seasonStatus,
+      seasons: toRegulationSeasons(detail?.seasons),
+      ...(edibilityNote ? { edibilityNote } : {}),
+      status: prohibited
+        ? "prohibited"
+        : seasonStatus === "out-of-season"
+          ? "out-of-season"
+          : "open",
+    };
   }
 }

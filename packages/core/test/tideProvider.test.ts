@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Mock, It, Times } from "moq.ts";
-import { IHttpClient, IGeocoder } from "../src/interfaces";
+import { HttpClient, Geocoder } from "../src/interfaces";
 import { NoaaTideProvider } from "../src/services/tideProvider";
 import { TideType } from "../src/types/tideType";
 import { NoaaStationsResponse, NoaaPredictionsResponse } from "../src/types/noaa";
@@ -30,11 +30,11 @@ const mockPredictionsResponse: NoaaPredictionsResponse = {
 
 describe("NoaaTideProvider", () => {
   let tideProvider: NoaaTideProvider;
-  let httpClientMock: Mock<IHttpClient>;
-  let geocoderMock: Mock<IGeocoder>;
+  let httpClientMock: Mock<HttpClient>;
+  let geocoderMock: Mock<Geocoder>;
 
   beforeEach(() => {
-    httpClientMock = new Mock<IHttpClient>();
+    httpClientMock = new Mock<HttpClient>();
     httpClientMock
       .setup((instance) => instance.get(It.Is<string>((url) => url.includes("stations.json"))))
       .returnsAsync(mockStationsResponse);
@@ -42,7 +42,7 @@ describe("NoaaTideProvider", () => {
       .setup((instance) => instance.get(It.Is<string>((url) => url.includes("datagetter"))))
       .returnsAsync(mockPredictionsResponse);
 
-    geocoderMock = new Mock<IGeocoder>();
+    geocoderMock = new Mock<Geocoder>();
     geocoderMock
       .setup((instance) => instance.geocode(It.IsAny()))
       .returnsAsync({
@@ -52,7 +52,7 @@ describe("NoaaTideProvider", () => {
         state: "NC",
       });
 
-    registerMocks({ IHttpClient: httpClientMock, IGeocoder: geocoderMock });
+    registerMocks({ HttpClient: httpClientMock, Geocoder: geocoderMock });
     tideProvider = container.resolve(NoaaTideProvider);
   });
 
@@ -98,7 +98,7 @@ describe("NoaaTideProvider", () => {
 
   it("getTides_noaaReturnsError_throwsWithErrorMessage", async () => {
     const errorMessage = "Station not found";
-    const errorHttpMock = new Mock<IHttpClient>();
+    const errorHttpMock = new Mock<HttpClient>();
     errorHttpMock
       .setup((instance) => instance.get(It.Is<string>((url) => url.includes("stations.json"))))
       .returnsAsync(mockStationsResponse);
@@ -106,7 +106,7 @@ describe("NoaaTideProvider", () => {
       .setup((instance) => instance.get(It.Is<string>((url) => url.includes("datagetter"))))
       .returnsAsync({ error: { message: errorMessage } });
 
-    registerMocks({ IHttpClient: errorHttpMock, IGeocoder: geocoderMock });
+    registerMocks({ HttpClient: errorHttpMock, Geocoder: geocoderMock });
     tideProvider = container.resolve(NoaaTideProvider);
 
     await expect(tideProvider.getTides("southport, nc")).rejects.toThrow(
