@@ -1,0 +1,48 @@
+name: build-and-push
+
+# PRs run tests only; main pushes build the apps/web image and push it to the
+# fishon ECR repository (us-east-2), consumed by the Lambda deployment.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Volare-Consulting-Software/.github/.github/actions/node-build-and-test@main
+        with:
+          node-version: "22"
+          build-command: npm run build:web
+
+  # Image work runs on main pushes only; PRs never build or push images.
+  image:
+    needs: test
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    uses: Volare-Consulting-Software/.github/.github/workflows/push-container-image.yml@main
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    secrets: inherit
+    with:
+      registry: ecr
+      aws-region: us-east-2
+      image-name: fishon
+      dockerfile: ./apps/web/Dockerfile
+      include-latest-tag: true
