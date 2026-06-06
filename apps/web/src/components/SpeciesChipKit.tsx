@@ -1,4 +1,5 @@
 import type { SpeciesProfile, EdibilityRating } from "@volare-consulting/fishon";
+import { Ruler } from "lucide-react";
 
 export const FISH_RULES_URL = "https://app.fishrulesapp.com/";
 
@@ -113,12 +114,13 @@ export function RegulationChips({ profile }: { profile: SpeciesProfile }) {
           {unit}
         </Chip>
       )}
-      {reg.measurementName && (
+      {(reg.measurementAbbreviation || reg.measurementName) && (
         <Chip
           className="border-line bg-sunken text-ink-2"
-          title="How length is measured"
+          title={`Measured by ${reg.measurementName ?? "length"}`}
         >
-          {reg.measurementName}
+          <Ruler className="mr-1 h-3 w-3" />
+          {reg.measurementAbbreviation ?? reg.measurementName}
         </Chip>
       )}
     </>

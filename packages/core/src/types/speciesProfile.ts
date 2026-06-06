@@ -33,6 +33,8 @@ export interface SpeciesRegulation {
   sizeUnit: string | null;
   /** How the fish is measured, e.g. "Fork Length", "Total Length". */
   measurementName: string | null;
+  /** Short measurement code, e.g. "FL", "TL". */
+  measurementAbbreviation: string | null;
   prohibited: boolean;
   seasonStatus: SeasonStatus;
   seasons: RegulationSeason[];

@@ -115,6 +115,7 @@ export class RegulationsProvider implements SpeciesRegulationsProvider {
       sizeUnit:
         detail?.measurement_unit ?? detail?.measurement_unit_symbol ?? null,
       measurementName: detail?.measurement_name ?? null,
+      measurementAbbreviation: detail?.measurement_abbreviation ?? null,
       prohibited,
       seasonStatus,
       seasons: toRegulationSeasons(detail?.seasons),
