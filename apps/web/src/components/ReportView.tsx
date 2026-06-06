@@ -1,8 +1,7 @@
 import { FishingDayReport } from "@/types/fishingDayReport";
 import { DayCard } from "./DayCard";
 import { SpotsExplorer } from "./SpotsExplorer";
-import { SpeciesChips } from "./SpeciesChips";
-import { SpeciesProfiles } from "./SpeciesProfiles";
+import { SpeciesBrowser } from "./SpeciesBrowser";
 import { SuggestionPanel } from "./SuggestionPanel";
 import { McpCallout } from "./McpCallout";
 
@@ -50,9 +49,14 @@ export function ReportView({ reports }: ReportViewProps) {
         <SpotsExplorer center={first.location} spots={first.reefs} />
       )}
 
-      {/* 3. Fish: profiles + the full species list. */}
-      <SpeciesProfiles profiles={first.speciesProfiles} />
-      <SpeciesChips species={first.species} highlight={targetSpecies} />
+      {/* 3. Fish: searchable browser of everything you can target here, with
+          the day's target species surfaced first and full rules on demand. */}
+      <SpeciesBrowser
+        species={first.species}
+        profiles={first.speciesProfiles}
+        highlight={targetSpecies}
+        location={`${first.location.name}, ${first.location.state}`}
+      />
 
       {/* 4. Suggested plan(s) for the day(s). */}
       <div className="space-y-3">

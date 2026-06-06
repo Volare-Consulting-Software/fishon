@@ -26,6 +26,7 @@ function build(entries: FishRulesLocationEntry[], obis: FishSpecies[]) {
 
   const fish = new Mock<FishRulesClient>();
   fish.setup((i) => i.getAreaSpecies(It.IsAny(), It.IsAny())).returnsAsync(entries);
+  fish.setup((i) => i.imageUrl(It.IsAny())).returns("img");
 
   const logger = new Mock<Logger>();
   logger.setup((i) => i.info(It.IsAny())).returns();
@@ -67,6 +68,9 @@ describe("FishRulesSpeciesProvider", () => {
         occurrenceCount: 0,
         regulationId: 27912,
         fishId: 100,
+        imageUrl: "img",
+        bagLimit: 1,
+        prohibited: false,
       },
     ]);
   });

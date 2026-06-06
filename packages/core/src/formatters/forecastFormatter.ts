@@ -69,9 +69,15 @@ export function formatSpotsReport(spots: FishingSpot[]): string {
 
 export function formatSpeciesReport(species: FishSpecies[]): string {
   if (species.length === 0) return "No species records found for this area.";
-  let output = `\nFish recorded nearby (${species.length}), by occurrence\n`;
+  let output = `\nFish you can target nearby (${species.length})\n`;
   for (const s of species) {
-    output += `  ${String(s.occurrenceCount).padStart(5)}  ${s.commonName} (${s.scientificName})\n`;
+    const tags: string[] = [];
+    if (s.waterType) tags.push(s.waterType);
+    if (s.prohibited) tags.push("no-harvest");
+    else if (s.bagLimit !== null && s.bagLimit !== undefined)
+      tags.push(`bag ${s.bagLimit}`);
+    const suffix = tags.length ? ` [${tags.join(", ")}]` : "";
+    output += `  ${s.commonName} (${s.scientificName})${suffix}\n`;
   }
   return output;
 }
