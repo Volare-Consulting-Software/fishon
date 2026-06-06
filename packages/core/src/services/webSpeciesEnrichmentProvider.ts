@@ -28,6 +28,29 @@ interface WikiSummary {
   type?: string;
 }
 
+// Module-scoped so the cache survives the per-request provider instances.
+const LOOKUP_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const photoCache = new Map<
+  string,
+  { at: number; value: Promise<{ url?: string; attribution?: string }> }
+>();
+const summaryCache = new Map<
+  string,
+  { at: number; value: Promise<string | undefined> }
+>();
+
+function cachedLookup<T>(
+  cache: Map<string, { at: number; value: Promise<T> }>,
+  key: string,
+  fetcher: () => Promise<T>
+): Promise<T> {
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.at < LOOKUP_TTL_MS) return hit.value;
+  const value = fetcher();
+  cache.set(key, { at: Date.now(), value });
+  return value;
+}
+
 @injectable()
 export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
   constructor(
@@ -103,7 +126,18 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
     );
   }
 
-  private async photo(
+  // Photos/descriptions are effectively static per species. Cache them at module
+  // scope (the provider itself is resolved fresh per request) so repeat lookups
+  // across requests in a warm process skip the iNaturalist/Wikipedia round-trips.
+  private photo(
+    scientificName: string
+  ): Promise<{ url?: string; attribution?: string }> {
+    return cachedLookup(photoCache, scientificName, () =>
+      this.fetchPhoto(scientificName)
+    );
+  }
+
+  private async fetchPhoto(
     scientificName: string
   ): Promise<{ url?: string; attribution?: string }> {
     try {
@@ -121,7 +155,15 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
     }
   }
 
-  private async summary(scientificName: string): Promise<string | undefined> {
+  private summary(scientificName: string): Promise<string | undefined> {
+    return cachedLookup(summaryCache, scientificName, () =>
+      this.fetchSummary(scientificName)
+    );
+  }
+
+  private async fetchSummary(
+    scientificName: string
+  ): Promise<string | undefined> {
     try {
       const data = await this.httpClient.get<WikiSummary>(
         `${this.config.wikipediaApiUrl}/page/summary/${encodeURIComponent(scientificName)}`,

@@ -19,10 +19,18 @@ interface Credentials {
 // current pair at runtime from the live bundle (cached for the process), and
 // fall back to the values baked into config. An explicit env override
 // (FISHRULES_CLIENT_ID + FISHRULES_API_KEY) short-circuits the scrape.
+// Regulations change slowly; keep area/detail responses for a day per process.
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+interface CacheEntry<T> {
+  at: number;
+  value: Promise<T>;
+}
+
 @injectable()
 export class FishRulesApiClient implements FishRulesClient {
-  private areaCache = new Map<string, Promise<FishRulesLocationEntry[]>>();
-  private detailCache = new Map<number, Promise<FishRulesRegulationDetail | null>>();
+  private areaCache = new Map<string, CacheEntry<FishRulesLocationEntry[]>>();
+  private detailCache = new Map<number, CacheEntry<FishRulesRegulationDetail | null>>();
   private credentialsPromise: Promise<Credentials> | null = null;
 
   constructor(
@@ -38,23 +46,30 @@ export class FishRulesApiClient implements FishRulesClient {
 
   getAreaSpecies(lat: number, lng: number): Promise<FishRulesLocationEntry[]> {
     const key = `${lat.toFixed(4)},${lng.toFixed(4)}`;
-    let pending = this.areaCache.get(key);
-    if (!pending) {
-      pending = this.fetchAreaSpecies(lat, lng);
-      this.areaCache.set(key, pending);
-    }
-    return pending;
+    return this.cached(this.areaCache, key, () =>
+      this.fetchAreaSpecies(lat, lng)
+    );
   }
 
   getRegulationDetail(
     regulationId: number
   ): Promise<FishRulesRegulationDetail | null> {
-    let pending = this.detailCache.get(regulationId);
-    if (!pending) {
-      pending = this.fetchRegulationDetail(regulationId);
-      this.detailCache.set(regulationId, pending);
-    }
-    return pending;
+    return this.cached(this.detailCache, regulationId, () =>
+      this.fetchRegulationDetail(regulationId)
+    );
+  }
+
+  // Shared TTL cache: reuse an in-flight/recent promise, refetch once stale.
+  private cached<K, T>(
+    cache: Map<K, CacheEntry<T>>,
+    key: K,
+    fetcher: () => Promise<T>
+  ): Promise<T> {
+    const hit = cache.get(key);
+    if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
+    const value = fetcher();
+    cache.set(key, { at: Date.now(), value });
+    return value;
   }
 
   private async fetchAreaSpecies(

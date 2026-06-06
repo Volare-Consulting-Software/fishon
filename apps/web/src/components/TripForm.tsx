@@ -8,6 +8,7 @@ import {
   Clock,
   Fish,
   History as HistoryIcon,
+  Loader2,
   MapPin,
   Search,
   X,
@@ -112,6 +113,9 @@ export function TripForm() {
   const [query, setQuery] = useState("");
   const [selectedText, setSelectedText] = useState("");
   const [suggestions, setSuggestions] = useState<GeoSuggestion[]>([]);
+  const [suggestState, setSuggestState] = useState<"idle" | "loading" | "done">(
+    "idle"
+  );
   const [methods, setMethods] = useState<FishingMethod[]>([]);
   const [areaSpecies, setAreaSpecies] = useState<FishSpecies[]>([]);
   const [interested, setInterested] = useState<string[]>([]);
@@ -127,22 +131,35 @@ export function TripForm() {
 
   useEffect(() => setHistory(loadHistory()), []);
 
-  // Location autocomplete (debounced).
+  // Location autocomplete (debounced) with a visible loading state so the
+  // dropdown appears the moment you type, not only once results land.
   useEffect(() => {
     if (query.trim().length < 3 || query === selectedText) {
       setSuggestions([]);
+      setSuggestState("idle");
       return;
     }
+    setSuggestState("loading");
+    let cancelled = false;
     const id = setTimeout(async () => {
       try {
         const res = await fetch(`/api/geocode/suggest?q=${encodeURIComponent(query)}`);
-        if (res.ok) setSuggestions((await res.json()) as GeoSuggestion[]);
+        const data = res.ok ? ((await res.json()) as GeoSuggestion[]) : [];
+        if (!cancelled) setSuggestions(data);
       } catch {
-        /* ignore */
+        if (!cancelled) setSuggestions([]);
+      } finally {
+        if (!cancelled) setSuggestState("done");
       }
     }, 250);
-    return () => clearTimeout(id);
+    return () => {
+      cancelled = true;
+      clearTimeout(id);
+    };
   }, [query, selectedText]);
+
+  const showSuggestions =
+    query.trim().length >= 3 && query !== selectedText && suggestState !== "idle";
 
   function toggle<T>(list: T[], value: T): T[] {
     return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -178,6 +195,7 @@ export function TripForm() {
     setQuery(clean);
     setSelectedText(clean);
     setSuggestions([]);
+    setSuggestState("idle");
     setAreaSpecies([]);
     setInterested([]);
   }
@@ -363,8 +381,13 @@ export function TripForm() {
                 className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-3"
               />
             </div>
-            {suggestions.length > 0 && (
+            {showSuggestions && (
               <ul className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-line bg-surface shadow-lg">
+                {suggestState === "loading" && (
+                  <li className="flex items-center gap-2 px-3 py-2 text-sm text-ink-3">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Searching…
+                  </li>
+                )}
                 {suggestions.map((s) => (
                   <li key={s.magicKey}>
                     <button
@@ -376,6 +399,11 @@ export function TripForm() {
                     </button>
                   </li>
                 ))}
+                {suggestState === "done" && suggestions.length === 0 && (
+                  <li className="px-3 py-2 text-sm text-ink-3">
+                    No matches found
+                  </li>
+                )}
               </ul>
             )}
           </div>

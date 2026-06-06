@@ -9,11 +9,17 @@ interface FishImageProps {
   alt: string;
 }
 
+// Route external photos through our same-origin proxy so they cache immutably
+// at the edge/browser; leave local URLs untouched.
+function proxied(url: string): string {
+  return url.startsWith("http") ? `/api/img?u=${encodeURIComponent(url)}` : url;
+}
+
 // Walks a list of candidate image URLs (e.g. Fish Rules species image, then an
 // iNaturalist photo). Fish Rules images 404 for ~half of species, so we fall
 // through to the next source and only show the neutral glyph when all fail.
 export function FishImage({ candidates, alt }: FishImageProps) {
-  const urls = candidates.filter((c): c is string => !!c);
+  const urls = candidates.filter((c): c is string => !!c).map(proxied);
   const [index, setIndex] = useState(0);
 
   // When new candidates arrive (e.g. the lazy-loaded photo), retry from the top.
