@@ -36,7 +36,10 @@ export function SpeciesBrowser({
   onToggleSelect,
 }: SpeciesBrowserProps) {
   const [query, setQuery] = useState("");
-  const [water, setWater] = useState<WaterFilter>("all");
+  // Default to saltwater — most trips are coastal and it trims the long
+  // statewide list; Fresh/All remain one click away. Species regulated in both
+  // (and OBIS-sourced species without a water type) still show.
+  const [water, setWater] = useState<WaterFilter>("salt");
   const [details, setDetails] = useState<Record<string, SpeciesProfile>>(() =>
     Object.fromEntries(profiles.map((p) => [p.commonName.toLowerCase(), p]))
   );
