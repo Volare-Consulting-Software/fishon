@@ -65,13 +65,22 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
           fish.scientificName.toLowerCase()
         );
 
-        // Fish Rules supplies a species photo and an authoritative edibility
-        // note; fall back to iNaturalist/Wikipedia only when it doesn't.
-        const summary = await this.summary(fish.scientificName);
-        const photo: { url?: string; attribution?: string } =
-          regulation !== undefined
-            ? { url: this.fishRules.imageUrl(regulation.fishId) }
-            : await this.photo(fish.scientificName);
+        // Prefer a real iNaturalist photo (broad coverage + attribution); fall
+        // back to the Fish Rules species image, which only exists for ~half of
+        // species and can't be enumerated reliably.
+        const [summary, inat] = await Promise.all([
+          this.summary(fish.scientificName),
+          this.photo(fish.scientificName),
+        ]);
+        const frImage = regulation
+          ? this.fishRules.imageUrl(regulation.fishId)
+          : undefined;
+        const photo: { url?: string; attribution?: string } = {
+          ...(inat.url ?? frImage ? { url: inat.url ?? frImage } : {}),
+          ...(inat.url && inat.attribution
+            ? { attribution: inat.attribution }
+            : {}),
+        };
         const { edibility, edibilityNote } = resolveEdibility(
           regulation,
           summary

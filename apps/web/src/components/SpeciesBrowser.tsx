@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FishSpecies, SpeciesProfile } from "@volare-consulting/fishon";
-import { ExternalLink, Fish, Search, Loader2 } from "lucide-react";
+import { Fish, Search, Loader2 } from "lucide-react";
 import { FishImage } from "./FishImage";
 import { EDIBILITY, RegulationChips, fishRulesLink } from "./SpeciesChipKit";
 
@@ -14,7 +14,7 @@ interface SpeciesBrowserProps {
   profiles: SpeciesProfile[];
   /** Common names highlighted by the day's plan. */
   highlight: string[];
-  /** Location string used to lazy-load a single profile on expand. */
+  /** Location string used to lazy-load a single profile when a card scrolls in. */
   location: string;
 }
 
@@ -30,18 +30,44 @@ export function SpeciesBrowser({
   const [details, setDetails] = useState<Record<string, SpeciesProfile>>(() =>
     Object.fromEntries(profiles.map((p) => [p.commonName.toLowerCase(), p]))
   );
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [loading, setLoading] = useState<string | null>(null);
+  const requested = useRef<Set<string>>(new Set());
 
   const hi = useMemo(
     () => new Set(highlight.map((h) => h.toLowerCase())),
     [highlight]
   );
 
+  const loadProfile = useCallback(
+    async (fish: FishSpecies) => {
+      const key = fish.commonName.toLowerCase();
+      if (requested.current.has(key)) return;
+      requested.current.add(key);
+      try {
+        const res = await fetch(
+          `/api/species/profiles?location=${encodeURIComponent(
+            location
+          )}&names=${encodeURIComponent(fish.commonName)}`
+        );
+        if (res.ok) {
+          const found: SpeciesProfile[] = await res.json();
+          if (found[0]) setDetails((d) => ({ ...d, [key]: found[0]! }));
+        }
+      } catch {
+        // Leave uncached; the card keeps its cheap chips.
+      }
+    },
+    [location]
+  );
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = species.filter((s) => {
-      if (water !== "all" && s.waterType && s.waterType !== "both" && s.waterType !== water)
+      if (
+        water !== "all" &&
+        s.waterType &&
+        s.waterType !== "both" &&
+        s.waterType !== water
+      )
         return false;
       if (!q) return true;
       return (
@@ -57,32 +83,6 @@ export function SpeciesBrowser({
       return a.commonName.localeCompare(b.commonName);
     });
   }, [species, query, water, hi]);
-
-  async function toggle(fish: FishSpecies) {
-    const key = fish.commonName.toLowerCase();
-    if (expanded === key) {
-      setExpanded(null);
-      return;
-    }
-    setExpanded(key);
-    if (details[key] || loading) return;
-    setLoading(key);
-    try {
-      const res = await fetch(
-        `/api/species/profiles?location=${encodeURIComponent(
-          location
-        )}&names=${encodeURIComponent(fish.commonName)}`
-      );
-      if (res.ok) {
-        const found: SpeciesProfile[] = await res.json();
-        if (found[0]) setDetails((d) => ({ ...d, [key]: found[0]! }));
-      }
-    } catch {
-      // Leave uncached; the card still shows its summary chips.
-    } finally {
-      setLoading(null);
-    }
-  }
 
   if (species.length === 0) return null;
 
@@ -107,22 +107,17 @@ export function SpeciesBrowser({
         </div>
       </div>
 
-      <div className="max-h-[30rem] overflow-y-auto pr-1">
+      <div className="max-h-[32rem] overflow-y-auto pr-1">
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((fish) => {
-            const key = fish.commonName.toLowerCase();
-            return (
-              <SpeciesCard
-                key={fish.regulationId ?? fish.scientificName}
-                fish={fish}
-                detail={details[key]}
-                isExpanded={expanded === key}
-                isLoading={loading === key}
-                isTarget={hi.has(key)}
-                onToggle={() => toggle(fish)}
-              />
-            );
-          })}
+          {filtered.map((fish) => (
+            <SpeciesCard
+              key={fish.regulationId ?? fish.scientificName}
+              fish={fish}
+              detail={details[fish.commonName.toLowerCase()]}
+              isTarget={hi.has(fish.commonName.toLowerCase())}
+              onVisible={() => loadProfile(fish)}
+            />
+          ))}
         </div>
         {filtered.length === 0 && (
           <p className="py-6 text-center text-xs text-ink-3">
@@ -132,9 +127,9 @@ export function SpeciesBrowser({
       </div>
 
       <p className="mt-3 text-xs text-ink-3">
-        Species & regulations via Fish Rules — bag, size, and season are shown
-        for your location; always confirm the full rules before keeping fish.
-        Edibility is a non-official, best-effort signal.
+        Species & regulations via Fish Rules — bag, size, and season shown for
+        your location; always confirm the full rules before keeping fish. Photos
+        via iNaturalist/Fish Rules; edibility is a non-official signal.
       </p>
     </div>
   );
@@ -175,115 +170,104 @@ function WaterTabs({
 interface SpeciesCardProps {
   fish: FishSpecies;
   detail?: SpeciesProfile;
-  isExpanded: boolean;
-  isLoading: boolean;
   isTarget: boolean;
-  onToggle: () => void;
+  onVisible: () => void;
 }
 
-function SpeciesCard({
-  fish,
-  detail,
-  isExpanded,
-  isLoading,
-  isTarget,
-  onToggle,
-}: SpeciesCardProps) {
-  const edibility = detail ? EDIBILITY[detail.edibility] ?? EDIBILITY.unknown : null;
-  return (
-    <div
-      className={`flex flex-col overflow-hidden rounded-lg border bg-surface transition ${
-        isExpanded ? "border-brand shadow-sm" : "border-line hover:border-brand/60"
-      }`}
-    >
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex items-center gap-3 p-2 text-left"
-      >
-        <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-sunken">
-          <FishImage src={fish.imageUrl} alt={fish.commonName} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="truncate text-sm font-semibold capitalize text-ink">
-              {fish.commonName}
-            </span>
-            {isTarget && (
-              <span className="shrink-0 rounded-full border border-brand/40 bg-brand-subtle px-1.5 text-[10px] font-medium text-brand">
-                On your plan
-              </span>
-            )}
-          </div>
-          <div className="truncate text-xs italic text-ink-3">
-            {fish.scientificName}
-          </div>
-          <div className="mt-1 flex flex-wrap gap-1">
-            {fish.prohibited ? (
-              <MiniChip className="border-error/40 bg-error/10 text-error">
-                No harvest
-              </MiniChip>
-            ) : (
-              fish.bagLimit !== null &&
-              fish.bagLimit !== undefined && (
-                <MiniChip className="border-brand/30 bg-brand-subtle text-brand">
-                  Bag {fish.bagLimit}
-                </MiniChip>
-              )
-            )}
-            {fish.waterType && fish.waterType !== "both" && (
-              <MiniChip className="border-line bg-sunken text-ink-2">
-                {fish.waterType === "salt" ? "Saltwater" : "Freshwater"}
-              </MiniChip>
-            )}
-          </div>
-        </div>
-      </button>
+function SpeciesCard({ fish, detail, isTarget, onVisible }: SpeciesCardProps) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const inView = useInView(ref);
 
-      {isExpanded && (
-        <div className="border-t border-line p-3">
-          {isLoading && !detail ? (
-            <div className="flex items-center gap-2 text-xs text-ink-3">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading regulations…
-            </div>
-          ) : detail ? (
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-1.5">
-                {edibility && (
-                  <span
-                    title={detail.edibilityNote ?? "Edibility unknown"}
-                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${edibility.className}`}
-                  >
-                    {edibility.label}
-                  </span>
-                )}
-                <RegulationChips profile={detail} />
-              </div>
-              {detail.summary && (
-                <p className="line-clamp-4 text-xs text-ink-2">{detail.summary}</p>
-              )}
-              <a
-                href={fishRulesLink(detail)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
-              >
-                <ExternalLink className="h-3 w-3" />
-                Full rules on Fish Rules
-              </a>
-            </div>
-          ) : (
-            <p className="text-xs text-ink-3">
-              Couldn’t load detailed rules — check Fish Rules directly.
-            </p>
+  // Kick off the detail fetch the first time the card scrolls into view.
+  useEffect(() => {
+    if (inView && !detail) onVisible();
+  }, [inView, detail, onVisible]);
+
+  const edibility = detail
+    ? EDIBILITY[detail.edibility] ?? EDIBILITY.unknown
+    : null;
+  const href = detail ? fishRulesLink(detail) : "https://app.fishrulesapp.com/";
+
+  return (
+    <a
+      ref={ref}
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`Open ${fish.commonName} on Fish Rules`}
+      className="group flex gap-3 rounded-lg border border-line bg-surface p-2 transition hover:border-brand hover:shadow-sm"
+    >
+      <div className="h-16 w-16 shrink-0 overflow-hidden rounded bg-sunken">
+        <FishImage
+          candidates={[fish.imageUrl, detail?.imageUrl]}
+          alt={fish.commonName}
+        />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <span className="truncate text-sm font-semibold capitalize text-ink">
+            {fish.commonName}
+          </span>
+          {isTarget && (
+            <span className="shrink-0 rounded-full border border-brand/40 bg-brand-subtle px-1.5 text-[10px] font-medium text-brand">
+              On your plan
+            </span>
           )}
         </div>
-      )}
-    </div>
+
+        <div className="mt-1 flex flex-wrap gap-1">
+          {detail?.regulation ? (
+            <>
+              <RegulationChips profile={detail} />
+              {edibility && (
+                <span
+                  title={detail.edibilityNote ?? "Edibility unknown"}
+                  className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${edibility.className}`}
+                >
+                  {edibility.label}
+                </span>
+              )}
+            </>
+          ) : (
+            // Cheap chips shown instantly from the area list, before detail loads.
+            <CheapChips fish={fish} loading={!detail} />
+          )}
+        </div>
+      </div>
+    </a>
   );
 }
 
-function MiniChip({
+function CheapChips({ fish, loading }: { fish: FishSpecies; loading: boolean }) {
+  return (
+    <>
+      {fish.prohibited ? (
+        <Mini className="border-error/40 bg-error/10 text-error">No harvest</Mini>
+      ) : fish.bagLimit === 0 ? (
+        <Mini className="border-warning/40 bg-warning/10 text-warning">
+          Catch &amp; release
+        </Mini>
+      ) : (
+        fish.bagLimit !== null &&
+        fish.bagLimit !== undefined && (
+          <Mini className="border-brand/30 bg-brand-subtle text-brand">
+            Bag {fish.bagLimit}
+          </Mini>
+        )
+      )}
+      {fish.waterType && fish.waterType !== "both" && (
+        <Mini className="border-line bg-sunken text-ink-2">
+          {fish.waterType === "salt" ? "Saltwater" : "Freshwater"}
+        </Mini>
+      )}
+      {loading && (
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-ink-3" />
+      )}
+    </>
+  );
+}
+
+function Mini({
   children,
   className,
 }: {
@@ -297,4 +281,25 @@ function MiniChip({
       {children}
     </span>
   );
+}
+
+// Fires once when the element first enters the viewport (incl. its scroll parent).
+function useInView(ref: React.RefObject<HTMLElement | null>): boolean {
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || inView) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref, inView]);
+  return inView;
 }

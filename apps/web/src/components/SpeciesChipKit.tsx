@@ -81,10 +81,19 @@ export function RegulationChips({ profile }: { profile: SpeciesProfile }) {
   return (
     <>
       <StatusChip profile={profile} />
-      {reg.bagLimit !== null && (
-        <Chip className={REG_CHIP} title={`Daily bag limit · ${reg.locationName}`}>
-          Bag {reg.bagLimit}
+      {reg.bagLimit === 0 ? (
+        <Chip
+          className="border-warning/40 bg-warning/10 text-warning"
+          title={`Zero bag limit — catch & release · ${reg.locationName}`}
+        >
+          Catch &amp; release
         </Chip>
+      ) : (
+        reg.bagLimit !== null && (
+          <Chip className={REG_CHIP} title={`Daily bag limit · ${reg.locationName}`}>
+            Bag {reg.bagLimit}
+          </Chip>
+        )
       )}
       {reg.minSize !== null && (
         <Chip className={REG_CHIP} title={`Minimum size · ${reg.locationName}`}>

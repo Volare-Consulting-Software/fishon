@@ -1,22 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Fish } from "lucide-react";
 
 interface FishImageProps {
-  src?: string;
+  /** Image sources tried in order; the first that loads wins. Falsy entries are skipped. */
+  candidates: (string | undefined)[];
   alt: string;
 }
 
-// Fish Rules photos are constructed from the species id and occasionally 404.
-// On error we fall back to a neutral fish glyph rather than a broken image.
-export function FishImage({ src, alt }: FishImageProps) {
-  const [failed, setFailed] = useState(false);
+// Walks a list of candidate image URLs (e.g. Fish Rules species image, then an
+// iNaturalist photo). Fish Rules images 404 for ~half of species, so we fall
+// through to the next source and only show the neutral glyph when all fail.
+export function FishImage({ candidates, alt }: FishImageProps) {
+  const urls = candidates.filter((c): c is string => !!c);
+  const [index, setIndex] = useState(0);
 
-  if (!src || failed) {
+  // When new candidates arrive (e.g. the lazy-loaded photo), retry from the top.
+  useEffect(() => {
+    setIndex(0);
+  }, [urls.join("|")]);
+
+  const src = urls[index];
+  if (!src) {
     return (
       <div className="flex h-full items-center justify-center text-ink-3">
-        <Fish className="h-8 w-8" />
+        <Fish className="h-7 w-7" />
       </div>
     );
   }
@@ -27,7 +36,7 @@ export function FishImage({ src, alt }: FishImageProps) {
       src={src}
       alt={alt}
       className="h-full w-full object-cover"
-      onError={() => setFailed(true)}
+      onError={() => setIndex((i) => i + 1)}
     />
   );
 }
