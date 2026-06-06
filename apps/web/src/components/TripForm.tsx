@@ -29,6 +29,7 @@ import {
 } from "@/lib/planHistory";
 import { LoadingSplash } from "./LoadingSplash";
 import { ReportView } from "./ReportView";
+import { SpeciesBrowser } from "./SpeciesBrowser";
 
 // The forecast scrape only covers 7 days, so constrain the picker to match.
 const WINDOW_DAYS = 7;
@@ -437,13 +438,14 @@ export function TripForm() {
                 <Fish className="h-4 w-4" /> {findingFish ? "Finding fish…" : "Find fish in this area"}
               </button>
             ) : (
-              <div className="flex flex-wrap gap-1.5">
-                {areaSpecies.map((s) => (
-                  <Pill key={s.scientificName} active={interested.includes(s.commonName)} onClick={() => setInterested(toggle(interested, s.commonName))}>
-                    <span className="capitalize">{s.commonName}</span>
-                  </Pill>
-                ))}
-              </div>
+              <SpeciesBrowser
+                species={areaSpecies}
+                location={location}
+                variant="embedded"
+                selectable
+                selected={interested}
+                onToggleSelect={(name) => setInterested(toggle(interested, name))}
+              />
             )}
           </div>
 
