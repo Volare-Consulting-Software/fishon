@@ -40,12 +40,15 @@ export class FishweatherScraper {
       headless,
       args: [
         "--disable-blink-features=AutomationControlled",
-        // Container/Lambda-safe flags: the sandbox needs root privileges the
-        // runtime lacks, and Chromium's default shared-memory dir (/dev/shm)
-        // is tiny in Lambda, crashing the renderer ("Target closed") unless
-        // routed to /tmp.
+        // Lambda-safe flags. Lambda's kernel forbids the user-namespace
+        // clone() Chromium's zygote uses to fork sandboxed children
+        // (FATAL credentials.cc "Operation not permitted"), so disable the
+        // zygote and run single-process. --disable-dev-shm-usage routes shared
+        // memory to /tmp (Lambda's /dev/shm is tiny).
         "--no-sandbox",
         "--disable-setuid-sandbox",
+        "--no-zygote",
+        "--single-process",
         "--disable-dev-shm-usage",
         "--disable-gpu",
       ],
