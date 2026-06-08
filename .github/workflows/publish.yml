@@ -2,19 +2,20 @@ name: Publish to npm
 
 # Release flow (monorepo — the published package lives in packages/core):
 #   1. Bump packages/core/package.json version on a PR and merge to main.
-#   2. Tag the merge commit: `git tag v1.1.0 && git push origin v1.1.0`
-#      (the tag must equal packages/core/package.json version, or the job fails).
-# Pushing the tag runs the org's shared public-npm publish workflow, scoped to
-# the packages/core workspace via `working-directory`, authenticating with the
-# org-level NPM_TOKEN secret.
+#   2. Tag the merge commit: `git tag core-v1.2.0 && git push origin core-v1.2.0`
+#      (the version after the prefix must equal packages/core/package.json
+#      version, or the job fails).
+# The core-v prefix is deliberate: the app's release flow (main.yml ->
+# draft-release) creates plain v<MAJ.MIN.RUN> tags when a release is
+# published, and those must not fire an npm publish.
 #
-# Tests are skipped: the core suite drives a Playwright/Chromium browser the
-# publish runner doesn't provision.
+# Tests are skipped: they already ran on the PR (release-time jobs trust PR
+# validation per the org CI/CD convention).
 
 on:
   push:
     tags:
-      - "v*"
+      - "core-v*"
 
 jobs:
   publish:
@@ -22,6 +23,7 @@ jobs:
     with:
       node-version: "20"
       working-directory: "packages/core"
+      tag-prefix: core-v
       skip-tests: true
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
