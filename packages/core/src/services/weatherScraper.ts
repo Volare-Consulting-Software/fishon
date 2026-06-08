@@ -74,11 +74,16 @@ export class FishweatherScraper {
     location: string
   ): Promise<Station> {
     const searchUrl = `${this.config.fishweatherBaseUrl}/windlist/${encodeURIComponent(location)}`;
+    // domcontentloaded, not load: the page has a resource that never settles,
+    // so "load" can hang. Wait for the actual spot rows instead of a fixed
+    // sleep — fast when the site is fast, patient up to selectorTimeout.
     await page.goto(searchUrl, {
-      waitUntil: "load",
+      waitUntil: "domcontentloaded",
       timeout: this.config.browserTimeout,
     });
-    await page.waitForTimeout(5000);
+    await page.waitForSelector("a.jwx-spot-list-row", {
+      timeout: this.config.selectorTimeout,
+    });
 
     // The site was redesigned: the old ".jw-spot-list > li" markup is gone.
     // Results are now anchor rows (a.jwx-spot-list-row) whose href carries the
@@ -120,13 +125,14 @@ export class FishweatherScraper {
   ): Promise<ForecastRow[]> {
     const spotUrl = `${this.config.fishweatherBaseUrl}/spot/${spotId}`;
     await page.goto(spotUrl, {
-      waitUntil: "load",
+      waitUntil: "domcontentloaded",
       timeout: this.config.browserTimeout,
     });
 
-    await page.waitForTimeout(5000);
+    // The forecast table lazy-renders on scroll; trigger it, then wait for the
+    // wind cells to appear rather than sleeping a fixed 8s. The scroll is
+    // load-bearing — without it the table never renders.
     await page.evaluate(() => window.scrollTo(0, 1500));
-    await page.waitForTimeout(3000);
 
     try {
       await page.waitForSelector('[class*="jw-fxt-table-cell-wind"]', {
@@ -144,7 +150,17 @@ export class FishweatherScraper {
       );
       if (btn) btn.click();
     });
-    await page.waitForTimeout(2000);
+    // Wait for the 7-day view to populate (>=12 AM/PM wind cells) instead of a
+    // fixed sleep; fall through to extraction if it doesn't expand in time.
+    await page
+      .waitForFunction(
+        () =>
+          document.querySelectorAll(
+            '[class*="jw-fxt-table-cell-wind"][class*="datacell"]'
+          ).length >= 12,
+        { timeout: 8000 }
+      )
+      .catch(() => undefined);
 
     const data: ScrapedData = await page.evaluate(() => {
       const dayCells = document.querySelectorAll(
