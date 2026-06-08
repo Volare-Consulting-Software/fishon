@@ -9,3 +9,6 @@ debug-screenshot.png
 next-env.d.ts
 *.tsbuildinfo
 .vercel/
+
+# local dev scratch
+.dev-web.log

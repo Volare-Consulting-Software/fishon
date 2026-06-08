@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Mock, It, Times } from "moq.ts";
 import {
-  IWeatherScraper,
-  ITideProvider,
-  IMoonPhaseProvider,
-  ILogger,
+  WeatherScraper,
+  TideProvider,
+  MoonPhaseProvider,
+  Logger,
 } from "../src/interfaces";
 import { ForecastService } from "../src/services/forecastService";
 import { ForecastRow } from "../src/types/forecastRow";
@@ -59,13 +59,13 @@ const mockTideResult: TideResult = {
 
 describe("ForecastService", () => {
   let service: ForecastService;
-  let weatherScraperMock: Mock<IWeatherScraper>;
-  let tideProviderMock: Mock<ITideProvider>;
-  let moonProviderMock: Mock<IMoonPhaseProvider>;
-  let loggerMock: Mock<ILogger>;
+  let weatherScraperMock: Mock<WeatherScraper>;
+  let tideProviderMock: Mock<TideProvider>;
+  let moonProviderMock: Mock<MoonPhaseProvider>;
+  let loggerMock: Mock<Logger>;
 
   function setupDefaultMocks() {
-    weatherScraperMock = new Mock<IWeatherScraper>();
+    weatherScraperMock = new Mock<WeatherScraper>();
     weatherScraperMock
       .setup((instance) => instance.getForecast(It.IsAny(), It.IsAny()))
       .returnsAsync({
@@ -73,12 +73,12 @@ describe("ForecastService", () => {
         forecast: [{ ...baseForecastRow }],
       });
 
-    tideProviderMock = new Mock<ITideProvider>();
+    tideProviderMock = new Mock<TideProvider>();
     tideProviderMock
       .setup((instance) => instance.getTides(It.IsAny()))
       .returnsAsync(mockTideResult);
 
-    moonProviderMock = new Mock<IMoonPhaseProvider>();
+    moonProviderMock = new Mock<MoonPhaseProvider>();
     moonProviderMock
       .setup((instance) => instance.getPhase(It.IsAny()))
       .returns({
@@ -96,20 +96,20 @@ describe("ForecastService", () => {
         },
       });
 
-    loggerMock = new Mock<ILogger>();
+    loggerMock = new Mock<Logger>();
     loggerMock.setup((instance) => instance.info(It.IsAny())).returns();
     loggerMock.setup((instance) => instance.warn(It.IsAny())).returns();
     loggerMock.setup((instance) => instance.error(It.IsAny())).returns();
   }
 
   function registerAllMocks(overrides?: {
-    ITideProvider?: Mock<ITideProvider>;
+    TideProvider?: Mock<TideProvider>;
   }) {
     registerMocks({
-      IWeatherScraper: weatherScraperMock,
-      ITideProvider: overrides?.ITideProvider ?? tideProviderMock,
-      IMoonPhaseProvider: moonProviderMock,
-      ILogger: loggerMock,
+      WeatherScraper: weatherScraperMock,
+      TideProvider: overrides?.TideProvider ?? tideProviderMock,
+      MoonPhaseProvider: moonProviderMock,
+      Logger: loggerMock,
     });
     service = container.resolve(ForecastService);
   }
@@ -145,12 +145,12 @@ describe("ForecastService", () => {
   });
 
   it("getForecast_tideProviderThrows_logsWarningAndReturnsEmptyTides", async () => {
-    const failingTideMock = new Mock<ITideProvider>();
+    const failingTideMock = new Mock<TideProvider>();
     failingTideMock
       .setup((instance) => instance.getTides(It.IsAny()))
       .callback(() => Promise.reject(new Error("NOAA is down")));
 
-    registerAllMocks({ ITideProvider: failingTideMock });
+    registerAllMocks({ TideProvider: failingTideMock });
 
     const result = await service.getForecast("southport, nc");
     expect(result.forecast[0]!.tides).toEqual([]);
@@ -162,7 +162,7 @@ describe("ForecastService", () => {
   });
 
   it("getForecast_moonPhase_usesPreviousNightNotForecastDate", async () => {
-    moonProviderMock = new Mock<IMoonPhaseProvider>();
+    moonProviderMock = new Mock<MoonPhaseProvider>();
     moonProviderMock
       .setup((instance) => instance.getPhase(It.IsAny()))
       .returns({ phase: MoonPhase.NewMoon, illumination: 0, age: 0 });
@@ -189,7 +189,7 @@ describe("ForecastService", () => {
   });
 
   it("getForecast_noMoonDataForPreviousNight_fallsBackToDefaults", async () => {
-    moonProviderMock = new Mock<IMoonPhaseProvider>();
+    moonProviderMock = new Mock<MoonPhaseProvider>();
     moonProviderMock
       .setup((instance) => instance.getPhase(It.IsAny()))
       .returns({ phase: MoonPhase.NewMoon, illumination: 0, age: 0 });
@@ -211,12 +211,12 @@ describe("ForecastService", () => {
   });
 
   it("getForecast_noTidesForForecastDate_setsEmptyTidesArray", async () => {
-    const emptyTideMock = new Mock<ITideProvider>();
+    const emptyTideMock = new Mock<TideProvider>();
     emptyTideMock
       .setup((instance) => instance.getTides(It.IsAny()))
       .returnsAsync({ ...mockTideResult, byDate: {} });
 
-    registerAllMocks({ ITideProvider: emptyTideMock });
+    registerAllMocks({ TideProvider: emptyTideMock });
 
     const result = await service.getForecast("southport, nc");
     expect(result.forecast[0]!.tides).toEqual([]);

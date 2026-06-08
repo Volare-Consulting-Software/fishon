@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { MoonPhaseProvider } from "../src/services/moonPhaseProvider";
+import { SynodicMoonPhaseProvider } from "../src/services/synodicMoonPhaseProvider";
 import { MoonPhase } from "../src/types/moonPhase";
 import { registerMocks, container } from "./testContainer";
 
@@ -9,12 +9,12 @@ const WAXING_CRESCENT_DATE = "2024-06-10";
 const START_DATE = "2024-01-01";
 const END_DATE_7 = "2024-01-07";
 
-describe("MoonPhaseProvider", () => {
-  let provider: MoonPhaseProvider;
+describe("SynodicMoonPhaseProvider", () => {
+  let provider: SynodicMoonPhaseProvider;
 
   beforeEach(() => {
     registerMocks({});
-    provider = container.resolve(MoonPhaseProvider);
+    provider = container.resolve(SynodicMoonPhaseProvider);
   });
 
   it("getPhase_knownNewMoonDate_returnsNewMoonPhase", () => {

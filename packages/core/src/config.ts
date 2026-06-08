@@ -38,8 +38,15 @@ export interface ForecastServiceConfig {
   inaturalistApiUrl: string;
   wikipediaApiUrl: string;
 
-  // --- regulations (Fish Rules, gated) + per-state fallback links ---
+  // --- regulations (Fish Rules) + per-state fallback links ---
+  /** Base URL for the regulations API: `${base}/location/{lat}/{lng}` and `${base}/{id}`. */
   fishRulesApiUrl: string;
+  /** Base URL for species photos: `${base}/{fish_id}/{fish_id}.jpg`. */
+  fishRulesImageUrl: string;
+  /** Public client id shipped in the Fish Rules web bundle (soft rate-limit only). */
+  fishRulesClientId: string;
+  /** Public api key shipped in the Fish Rules web bundle (not enforced). */
+  fishRulesApiKey: string;
   stateRegulations: Record<string, StateRegulation>;
 
   // --- NOAA NWS gridpoint (hourly wind) ---
@@ -129,6 +136,11 @@ export const DEFAULT_CONFIG: ForecastServiceConfig = {
   wikipediaApiUrl: "https://en.wikipedia.org/api/rest_v1",
 
   fishRulesApiUrl: "https://app.fishrulesapp.com/api/regulations",
+  fishRulesImageUrl: "https://app.fishrulesapp.com/images/fishimages",
+  // Public constants from the Fish Rules web bundle. Overridable via
+  // FISHRULES_CLIENT_ID / FISHRULES_API_KEY env vars (see FishRulesHttpClient).
+  fishRulesClientId: "NMpcWQac62mGoTxyKm7JjqrHpyVKW8zM",
+  fishRulesApiKey: "fqocqhLcf6iAZNohrc4Wrh9VyYMkwdH8",
   stateRegulations: STATE_REGULATIONS,
 
   weatherGovApiUrl: "https://api.weather.gov",

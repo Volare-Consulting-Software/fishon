@@ -69,9 +69,15 @@ export function formatSpotsReport(spots: FishingSpot[]): string {
 
 export function formatSpeciesReport(species: FishSpecies[]): string {
   if (species.length === 0) return "No species records found for this area.";
-  let output = `\nFish recorded nearby (${species.length}), by occurrence\n`;
+  let output = `\nFish you can target nearby (${species.length})\n`;
   for (const s of species) {
-    output += `  ${String(s.occurrenceCount).padStart(5)}  ${s.commonName} (${s.scientificName})\n`;
+    const tags: string[] = [];
+    if (s.waterType) tags.push(s.waterType);
+    if (s.prohibited) tags.push("no-harvest");
+    else if (s.bagLimit !== null && s.bagLimit !== undefined)
+      tags.push(`bag ${s.bagLimit}`);
+    const suffix = tags.length ? ` [${tags.join(", ")}]` : "";
+    output += `  ${s.commonName} (${s.scientificName})${suffix}\n`;
   }
   return output;
 }
@@ -83,9 +89,22 @@ export function formatSpeciesProfilesReport(profiles: SpeciesProfile[]): string 
     output += `\n${p.commonName} (${p.scientificName}) — edibility: ${p.edibility}\n`;
     if (p.regulation) {
       const r = p.regulation;
-      const bag = r.bagLimit !== null ? `bag ${r.bagLimit}` : "bag n/a";
-      const min = r.minSize !== null ? `min ${r.minSize}${r.sizeUnit ?? "in"}` : "";
-      output += `  ${r.status === "prohibited" ? "NO HARVEST" : "open"} · ${bag} ${min} (${r.locationName})\n`;
+      const unit = r.sizeUnit ?? "in";
+      const bag = r.bagLimit !== null ? `bag ${r.bagLimit}` : "no bag limit";
+      const sizes: string[] = [];
+      if (r.minSize !== null) sizes.push(`min ${r.minSize}${unit}`);
+      if (r.maxSize !== null) sizes.push(`max ${r.maxSize}${unit}`);
+      if (r.minSlotSize !== null && r.maxSlotSize !== null)
+        sizes.push(`slot ${r.minSlotSize}-${r.maxSlotSize}${unit}`);
+      if (r.measurementName) sizes.push(`(${r.measurementName})`);
+      const status =
+        r.status === "prohibited"
+          ? "NO HARVEST"
+          : r.status === "out-of-season"
+            ? "OUT OF SEASON"
+            : "open";
+      const detail = [bag, ...sizes].filter(Boolean).join(" · ");
+      output += `  ${status} · ${detail} (${r.locationName})\n`;
     }
     if (p.summary) output += `  ${p.summary}\n`;
     output += `  Regulations: ${p.regulationsLabel} — ${p.regulationsUrl}\n`;
