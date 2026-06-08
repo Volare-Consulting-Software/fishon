@@ -1,9 +1,8 @@
 name: release
 
-# Publishing a release ships it: promote the released version's image to
-# :latest registry-side (same digest, no rebuild). Prereleases are reserved
-# for a future staging environment. Future: deploy the Lambda here via
-# update-function-code (Lambda snapshots images; it does not follow :latest).
+# Publishing a release ships it: promote the released image to :latest
+# (registry-side, no rebuild), then deploy it to the Lambda via
+# update-function-code. Prereleases are reserved for a future staging tier.
 
 on:
   release:
@@ -24,3 +23,13 @@ jobs:
       image-name: fishon
       source-tag: ${{ github.event.release.tag_name }}
       dest-tags: latest
+
+  deploy:
+    needs: promote-latest
+    uses: Volare-Consulting-Software/.github/.github/workflows/deploy-aws-lambda.yml@main
+    secrets: inherit
+    with:
+      function-name: fishon
+      image-name: fishon
+      image-tag: ${{ github.event.release.tag_name }}
+      aws-region: us-east-2
