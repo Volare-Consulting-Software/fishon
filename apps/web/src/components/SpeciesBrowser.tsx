@@ -79,6 +79,9 @@ export function SpeciesBrowser({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = species.filter((s) => {
+      // Hide no-harvest (prohibited) species — the planner is about fish you
+      // can keep. They stay in the underlying data for suggestions/enrichment.
+      if (s.prohibited) return false;
       if (
         water !== "all" &&
         s.waterType &&
