@@ -15,6 +15,7 @@ export const TOKENS = createTokens([
   "Logger",
   "FishingSpotProvider",
   "SpeciesProvider",
+  "FishRulesClient",
   "SpeciesEnrichmentProvider",
   "SpeciesRegulationsProvider",
   "MarineHourlyProvider",

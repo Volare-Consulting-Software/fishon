@@ -11,6 +11,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+// Profiles (regulations + photo + description) change slowly; cache ~1 day.
+const CACHE_CONTROL =
+  "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800";
+
 const DEFAULT_COUNT = 6;
 
 export async function GET(request: NextRequest) {
@@ -46,7 +50,9 @@ export async function GET(request: NextRequest) {
         : species.slice(0, DEFAULT_COUNT);
 
     const profiles = await enrichment.enrich(selected, geo);
-    return NextResponse.json(profiles);
+    return NextResponse.json(profiles, {
+      headers: { "Cache-Control": CACHE_CONTROL },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 502 });

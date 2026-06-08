@@ -5,6 +5,7 @@ import {
   Logger,
   SpeciesEnrichmentProvider,
   SpeciesRegulationsProvider,
+  FishRulesClient,
 } from "../interfaces";
 import { ForecastServiceConfig } from "../config";
 import { FishSpecies } from "../types/fishSpecies";
@@ -14,6 +15,7 @@ import {
   EdibilityRating,
   SpeciesRegulation,
 } from "../types/speciesProfile";
+import { rateFishRulesEdibility, EdibilityVerdict } from "./edibility";
 
 interface NaturalistTaxaResponse {
   results?: Array<{
@@ -26,6 +28,29 @@ interface WikiSummary {
   type?: string;
 }
 
+// Module-scoped so the cache survives the per-request provider instances.
+const LOOKUP_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const photoCache = new Map<
+  string,
+  { at: number; value: Promise<{ url?: string; attribution?: string }> }
+>();
+const summaryCache = new Map<
+  string,
+  { at: number; value: Promise<string | undefined> }
+>();
+
+function cachedLookup<T>(
+  cache: Map<string, { at: number; value: Promise<T> }>,
+  key: string,
+  fetcher: () => Promise<T>
+): Promise<T> {
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.at < LOOKUP_TTL_MS) return hit.value;
+  const value = fetcher();
+  cache.set(key, { at: Date.now(), value });
+  return value;
+}
+
 @injectable()
 export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
   constructor(
@@ -33,7 +58,9 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
     @inject(TOKENS.ForecastServiceConfig) private readonly config: ForecastServiceConfig,
     @inject(TOKENS.Logger) private readonly logger: Logger,
     @inject(TOKENS.SpeciesRegulationsProvider)
-    private readonly regulations: SpeciesRegulationsProvider
+    private readonly regulations: SpeciesRegulationsProvider,
+    @inject(TOKENS.FishRulesClient)
+    private readonly fishRules: FishRulesClient
   ) {}
 
   async enrich(
@@ -47,6 +74,9 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
       species.map((s) => ({
         commonName: s.commonName,
         scientificName: s.scientificName,
+        ...(s.regulationId !== undefined
+          ? { regulationId: s.regulationId }
+          : {}),
       })),
       geo.lat,
       geo.lng
@@ -54,13 +84,29 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
 
     return Promise.all(
       species.map(async (fish) => {
-        const [photo, summary] = await Promise.all([
-          this.photo(fish.scientificName),
-          this.summary(fish.scientificName),
-        ]);
-        const { edibility, edibilityNote } = deriveEdibility(summary);
         const regulation: SpeciesRegulation | undefined = regMap.get(
           fish.scientificName.toLowerCase()
+        );
+
+        // Prefer a real iNaturalist photo (broad coverage + attribution); fall
+        // back to the Fish Rules species image, which only exists for ~half of
+        // species and can't be enumerated reliably.
+        const [summary, inat] = await Promise.all([
+          this.summary(fish.scientificName),
+          this.photo(fish.scientificName),
+        ]);
+        const frImage = regulation
+          ? this.fishRules.imageUrl(regulation.fishId)
+          : undefined;
+        const photo: { url?: string; attribution?: string } = {
+          ...(inat.url ?? frImage ? { url: inat.url ?? frImage } : {}),
+          ...(inat.url && inat.attribution
+            ? { attribution: inat.attribution }
+            : {}),
+        };
+        const { edibility, edibilityNote } = resolveEdibility(
+          regulation,
+          summary
         );
 
         return {
@@ -80,7 +126,18 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
     );
   }
 
-  private async photo(
+  // Photos/descriptions are effectively static per species. Cache them at module
+  // scope (the provider itself is resolved fresh per request) so repeat lookups
+  // across requests in a warm process skip the iNaturalist/Wikipedia round-trips.
+  private photo(
+    scientificName: string
+  ): Promise<{ url?: string; attribution?: string }> {
+    return cachedLookup(photoCache, scientificName, () =>
+      this.fetchPhoto(scientificName)
+    );
+  }
+
+  private async fetchPhoto(
     scientificName: string
   ): Promise<{ url?: string; attribution?: string }> {
     try {
@@ -98,7 +155,15 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
     }
   }
 
-  private async summary(scientificName: string): Promise<string | undefined> {
+  private summary(scientificName: string): Promise<string | undefined> {
+    return cachedLookup(summaryCache, scientificName, () =>
+      this.fetchSummary(scientificName)
+    );
+  }
+
+  private async fetchSummary(
+    scientificName: string
+  ): Promise<string | undefined> {
     try {
       const data = await this.httpClient.get<WikiSummary>(
         `${this.config.wikipediaApiUrl}/page/summary/${encodeURIComponent(scientificName)}`,
@@ -110,6 +175,18 @@ export class WebSpeciesEnrichmentProvider implements SpeciesEnrichmentProvider {
       return undefined;
     }
   }
+}
+
+// Prefer Fish Rules' own edibility note (per-species, semi-authoritative);
+// otherwise fall back to the Wikipedia-derived heuristic.
+function resolveEdibility(
+  regulation: SpeciesRegulation | undefined,
+  summary: string | undefined
+): EdibilityVerdict {
+  if (regulation?.edibilityNote) {
+    return rateFishRulesEdibility(regulation.edibilityNote);
+  }
+  return deriveEdibility(summary);
 }
 
 // Wikipedia descriptions aren't a regulatory edibility source, but they reliably

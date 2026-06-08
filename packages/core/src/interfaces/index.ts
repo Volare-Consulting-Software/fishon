@@ -7,6 +7,7 @@ export type { WeatherScraper } from "./weatherScraper";
 export type { Logger } from "./logger";
 export type { FishingSpotProvider } from "./fishingSpotProvider";
 export type { SpeciesProvider } from "./speciesProvider";
+export type { FishRulesClient } from "./fishRulesClient";
 export type { SpeciesEnrichmentProvider } from "./speciesEnrichmentProvider";
 export type {
   SpeciesRegulationsProvider,
