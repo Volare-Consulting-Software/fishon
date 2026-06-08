@@ -40,7 +40,14 @@ export class FishweatherScraper {
       headless,
       args: [
         "--disable-blink-features=AutomationControlled",
+        // Container/Lambda-safe flags: the sandbox needs root privileges the
+        // runtime lacks, and Chromium's default shared-memory dir (/dev/shm)
+        // is tiny in Lambda, crashing the renderer ("Target closed") unless
+        // routed to /tmp.
         "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
       ],
     });
 
