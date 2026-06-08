@@ -105,7 +105,6 @@ function Pill({
 export function TripForm() {
   const today = new Date();
   const todayIso = toIso(today);
-  const maxIso = toIso(addDays(today, WINDOW_DAYS - 1));
 
   const [dates, setDates] = useState<string[]>([]);
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -347,7 +346,6 @@ export function TripForm() {
                 ))}
               </div>
             )}
-            <input type="hidden" data-max={maxIso} />
           </div>
 
           {/* Time of day */}
