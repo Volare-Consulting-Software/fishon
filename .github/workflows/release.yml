@@ -1,0 +1,26 @@
+name: release
+
+# Publishing a release ships it: promote the released version's image to
+# :latest registry-side (same digest, no rebuild). Prereleases are reserved
+# for a future staging environment. Future: deploy the Lambda here via
+# update-function-code (Lambda snapshots images; it does not follow :latest).
+
+on:
+  release:
+    types: [released]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  promote-latest:
+    uses: Volare-Consulting-Software/.github/.github/workflows/push-container-image.yml@main
+    secrets: inherit
+    with:
+      registry: ecr
+      aws-region: us-east-2
+      image-name: fishon
+      source-tag: ${{ github.event.release.tag_name }}
+      dest-tags: latest
