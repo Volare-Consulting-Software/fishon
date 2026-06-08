@@ -1,0 +1,42 @@
+name: main
+
+# Main push stages a release: build the apps/web image, push the immutable
+# <MAJ.MIN>.<run_number> tag to ECR, and draft the matching v-tagged release.
+# Nothing ships until the release is published (see release.yml).
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+  workflow_dispatch:
+
+concurrency:
+  group: main-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  image:
+    uses: Volare-Consulting-Software/.github/.github/workflows/push-container-image.yml@main
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    secrets: inherit
+    with:
+      registry: ecr
+      aws-region: us-east-2
+      image-name: fishon
+      dockerfile: ./apps/web/Dockerfile
+      version-package-json: apps/web/package.json
+      include-version-tag: true
+      include-latest-tag: false
+
+  draft:
+    needs: image
+    uses: Volare-Consulting-Software/.github/.github/workflows/draft-release.yml@main
+    permissions:
+      contents: write
+    with:
+      tag-version: ${{ needs.image.outputs.image-tag-version }}
+      image-ref: ${{ needs.image.outputs.image-ref }}

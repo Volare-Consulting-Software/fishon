@@ -1,0 +1,28 @@
+name: ci
+
+# PR validation only: build + test. No docker, no registries, nothing on main
+# (per the org's release-driven CI/CD convention).
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "**/*.md"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Volare-Consulting-Software/.github/.github/actions/node-build-and-test@main
+        with:
+          node-version: "22"
+          build-command: npm run build:web
