@@ -41,6 +41,12 @@ export function FishImage({ candidates, alt }: FishImageProps) {
     <img
       src={src}
       alt={alt}
+      // Defer off-screen fetches: a results page has ~150 cards, and loading
+      // every photo at once floods one HTTP/2 connection past CloudFront's
+      // per-connection request cap (429s that also starve other assets like
+      // the map's stylesheet). Lazy-loading fetches only visible cards.
+      loading="lazy"
+      decoding="async"
       className="h-full w-full object-cover"
       onError={() => setIndex((i) => i + 1)}
     />
